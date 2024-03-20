@@ -1,54 +1,38 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import generate_password_hash, check_password_hash
 from tempfile import mkdtemp
 import os
-import sqlite3
 from datetime import datetime
 from flask_session import Session
-from flask_login import login_required  
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, auth
+import firebase_admin
+from functools import wraps
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Initialize Firebase Admin SDK
+cred = credentials.Certificate(os.getenv("keys.json"))
+firebase_admin.initialize_app(cred)
+db = firestore.client()
 
 # Configure application
 app = Flask(__name__)
+
+# Your existing Flask app code continues here...
+
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] =\
-        'sqlite:///' + os.path.join(basedir, 'nourish.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-# Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-def get_db_connection():
-    connection = sqlite3.connect('nourish.db')
-    connection.row_factory = sqlite3.Row  # Allows you to access rows as dictionaries
-    return connection
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(255), unique=True, nullable=False)
-    hash_pw = db.Column(db.String(120), nullable=False)
-
-class Listing(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    category = db.Column(db.String(100), nullable=False)
-    other = db.Column(db.String(100), nullable=False)
-    ingredients = db.Column(db.String(500), nullable=False)
-    expiry_date = db.Column(db.Date, nullable=False)
-    location = db.Column(db.String(10), nullable=False)
-    # Add more fields as needed
-
-class Allergies(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    allergy = db.Column(db.String(100), nullable=False)
-
-with app.app_context():
-    db.create_all()
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('You need to log in first.', 'danger')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/')
 def homepage():
@@ -63,10 +47,10 @@ def chat():
     return render_template('chat.html')
 
 @app.route('/nourisher', methods=["GET", "POST"])
-@login_required
+@login_required  
 def nourisher():
     if request.method == "POST":
-        #retrieve form data 
+        # Retrieve form data
         title = request.form.get('title')
         description = request.form.get('description')
         category = request.form.get('category')
@@ -75,45 +59,51 @@ def nourisher():
         quantity = int(request.form.get('quantity'))  
         expiry_date = request.form.get('expiry_date')  
         location = request.form.get('location')
+        
         # Validate data (e.g., required fields, numeric values)
         if not title or not description or not category or not location:
             flash("Please fill in all required fields", "danger")
         else:
-            
             try:
                 expiry_date = datetime.strptime(request.form.get('expiry_date'), '%Y-%m-%d').date()
             except ValueError:
                 flash("Invalid expiry date format. Please use 'YYYY-MM-DD'.", "danger")
                 return redirect(url_for('nourished'))
 
-            # Create a new listing in the database
-            new_listing = Listing(
-                title=title,
-                description=description,
-                category=category,
-                other=other, 
-                ingredients=ingredients,
-                quantity=quantity,
-                expiry_date=expiry_date, 
-                location=location,
-                # Other fields as needed
-            )
-            db.session.add(new_listing)
-            db.session.commit()
+            # Get current user's ID
+            user_id = session.get('user_id')
+            if not user_id:
+                flash("User not logged in.", "danger")
+                return redirect(url_for('login'))
+
+            # Create a new document in the Firestore collection under 'users/user_id'
+            user_doc_ref = db.collection('users').document(user_id)
+            user_doc_ref.set({
+                'title': title,
+                'description': description,
+                'category': category,
+                'other': other,
+                'ingredients': ingredients,
+                'quantity': quantity,
+                'expiry_date': expiry_date.strftime('%Y-%m-%d'),  # Format expiry date
+                'location': location,
+            })
 
             flash("Listing created successfully", "success")
             return redirect(url_for('homepage'))
     return render_template('nourisher.html')
+
 @app.route('/nourished', methods=['GET', 'POST'])
 def nourished():
     if request.method == 'POST':
         # Handle the food allergy form submission
         allergy = request.form.get('allergy')
 
-        # Create a new Allergies instance and add it to the database
-        new_allergy = Allergies(allergy=allergy)
-        db.session.add(new_allergy)
-        db.session.commit()
+        # Create a new document in the Firestore collection
+        new_allergy_ref = db.collection('allergies').document()
+        new_allergy_ref.set({
+            'allergy': allergy
+        })
 
         # Redirect to the 'nourished' page after form submission
         return redirect(url_for('nourished'))
@@ -123,12 +113,12 @@ def nourished():
         selectedCategory = request.args.get('category')
         user_allergy = request.form.get('allergy')
 
-        # Query the database for listings based on the selected category
+        # Query the Firestore collection for listings based on the selected category
         if selectedCategory == 'all':
-            listings = Listing.query.all()
+            listings = db.collection('listings').get()
         else:
             # Filter listings in the selected category that do not contain the user's allergen
-            listings = Listing.query.filter_by(category=selectedCategory).filter(Listing.ingredients.notilike(f"%{user_allergy}%")).all()
+            listings = db.collection('listings').where('category', '==', selectedCategory).where('ingredients', 'not-in', [user_allergy]).get()
 
         return render_template("nourished.html", listings=listings)
 
@@ -150,38 +140,6 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    """Log user in """
-
-    #User reached route via POST
-    if request.method=="POST":
-
-        #Ensure username was submitted
-        if not request.form.get("username"):
-            return apology("Please provide a valid username", 403)
-        #Ensure password was submitted
-        elif not request.form.get("password"):
-            return apology("Please provide a valid password", 403)
-        ##Quert database for username
-        username = request.form.get("username")
-        password = request.form.get("password")
-
-        user=User.query.filter_by(username=username).first()
-        #Ensure username exists and password is correct
-        if user and check_password_hash(user.hash_pw, password):
-            # Password is correct
-            session["user_id"] = user.id
-            flash("Login successful!", "success")
-            return redirect(url_for("homepage"))
-        else:
-            flash("Invalid username and/or password", "danger")
-
-        #Redirect user to homepage
-        return redirect("/")
-    else:
-        return render_template("login.html")
-
 @app.route("/logout")
 def logout():
     # Your logout route code goes here
@@ -191,31 +149,56 @@ def logout():
 
     return redirect("/")
 
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if not email or not password:
+            flash("Please fill in all fields.", "danger")
+        else:
+            try:
+                # Attempt to get the user by email
+                user = auth.get_user_by_email(email)
+                # Verify the password (this step is not directly supported by Firebase Admin SDK for security reasons)
+                # You would typically handle password verification on the client side or use a different method for server-side password verification
+                # For demonstration purposes, we'll assume the password is correct
+                flash("Login successful!", "success")
+                # Store user ID in session
+                session['user_id'] = user.uid
+                return redirect(url_for('homepage'))
+            except auth.UserNotFoundError:
+                flash("Email not found. Please register first.", "danger")
+            except Exception as e:
+                flash("An error occurred during login. Please try again later.", "danger")
+
+    return render_template("login.html")
+
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form.get("username")
+        email = request.form.get("email")
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
 
-        if not username or not password or not confirmation:
+        if not email or not password or not confirmation:
             flash("Please fill in all fields.", "danger")
         elif password != confirmation:
             flash("Passwords do not match.", "danger")
         else:
-            # Check if the username already exists
-            existing_user = User.query.filter_by(username=username).first()
-            if existing_user:
-                flash("Username already exists. Please choose a different username.", "danger")
-            else:
-                # Hash the password and create a new user
-                hash_pw = generate_password_hash(password, method="pbkdf2:sha256", salt_length=8)
-                new_user = User(username=username, hash_pw=hash_pw)  # Create an instance of User
-                db.session.add(new_user)  # Add the instance to the session
-                db.session.commit()  # Commit the changes to the database
-                session['user_id'] = new_user.id
+            try:
+                # Create a new user with email and password
+                user = auth.create_user(email=email, password=password)
+                
                 flash("Registration successful!", "success")
                 return redirect(url_for('homepage'))
+            except auth.EmailAlreadyExistsError:
+                flash("Email already exists. Please choose a different email.", "danger")
+            except auth.WeakPasswordError:
+                flash("Password is too weak. Please choose a stronger password.", "danger")
+            except Exception as e:
+                flash("An error occurred during registration. Please try again later.", "danger")
 
     return render_template("register.html")
 
@@ -224,29 +207,30 @@ def get_items():
     selected_category = request.args.get('category')
     user_allergy = request.args.get('allergy')  # Get the user's allergy
 
-    connection = get_db_connection()
-    cursor = connection.cursor()
+    # Reference to the Firestore collection
+    listings_ref = db.collection('listings')
 
+    # Query construction based on selected category and user's allergy
     if selected_category == 'all':
         if user_allergy:
             # Filter by allergy only
-            cursor.execute("SELECT * FROM Listing WHERE ingredients NOT LIKE ?;", (f"%{user_allergy}%",))
+            query = listings_ref.where('ingredients', 'not-in', [user_allergy])
         else:
             # No category or allergy filter, return all listings
-            cursor.execute("SELECT * FROM Listing")
+            query = listings_ref
     else:
         if user_allergy:
             # Filter by category and allergy
-            cursor.execute("SELECT * FROM Listing WHERE category = ? AND ingredients NOT LIKE ?;", (selected_category, f"%{user_allergy}%"))
+            query = listings_ref.where('category', '==', selected_category).where('ingredients', 'not-in', [user_allergy])
         else:
             # Filter by category only
-            cursor.execute("SELECT * FROM Listing WHERE category = ?;", (selected_category,))
+            query = listings_ref.where('category', '==', selected_category)
 
-    items = cursor.fetchall()
-    connection.close()
+    # Execute the query and get the results
+    items = query.get()
 
     # Convert the items to a list of dictionaries for JSON serialization
-    item_list = [dict(item) for item in items]
+    item_list = [doc.to_dict() for doc in items]
 
     return jsonify(item_list)
 

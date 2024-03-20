@@ -1,0 +1,504 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+.title {
+    font-size: 36px; /* Set the font size to your desired size */
+    font-weight: bold; /* Make the text bold */
+    text-align: center; /* Center the text horizontally */
+    margin-top: 50px; /* Adjust the margin to center the text vertically */
+}
+
+/* Reset some default styles */
+body,
+ul,
+li,
+p,
+h1,
+h2,
+h3,
+a {
+    margin: 10;
+    padding: 10;
+}   
+
+/* Set up basic fonts and background */
+body {
+    font-family: 'Roboto';
+    background-color: #f0f0f0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Styles */
+header {
+    background-color: #1a1a1a;
+    color: #fff;
+    padding: 10px 0;
+    margin-left: -10px;
+}
+
+.img{
+    width: 300px;
+    height:200px;
+    border-radius: 10px;
+}
+.header-logo {
+    text-decoration: none;
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.header-logo:hover {
+    color: #90EE90;
+}
+
+.navbar-collapse ul {
+    list-style: none;
+}
+
+.navbar-nav {
+    display: flex;
+}
+
+.nav-item {
+    margin-right: 50px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #fff;
+}
+
+.nav-link:hover {
+    color: #90EE90;
+}
+
+.logout {
+    position: absolute;
+    top: 0;
+    right: 0
+}
+/* Main Content Styles */
+main {
+    padding: 20px 0;
+    text-align: center;
+}
+
+main p {
+    margin: 20px 0;
+}
+
+/* Search Styles */
+.search-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.search-input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.search-button {
+    padding: 10px 20px;
+    background-color: #90EE90;
+    border: none;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Footer Styles */
+footer {
+    background-color: #1a1a1a;
+    color: #fff;
+    padding: 20px 0;
+}
+
+.social-networks p {
+    margin-bottom: 10px;
+}
+
+/* Back to Top Button Styles */
+#myBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #1a1a1a;
+    border: none;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#myBtn:hover {
+    background-color: #90EE90;
+}
+
+/* Define the CSS for the profile image */
+.profile-image {
+    float: right;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 10px; /* Adjust the margin to your preference */
+    width: 50px; /* Adjust the width and height to your preference */
+    height: 50px;
+    border: 2px solid #fff; /* Add a border to the image if desired */
+    border-radius: 50%; /* Make it a circle */
+    background-color: #F0F0F0; /* Set a background color for the border */
+    z-index: 2; /* Ensure it's on top of other content */
+}
+
+/* Apply styles to the form and form elements */
+form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+  
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+  
+  /* Style the date input */
+input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+  
+  /* Style the "Please specify" input */
+#other {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+  
+  /* Style the "Region" input and suggestions */
+#locationInput {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    position: relative;
+}
+  
+.autocomplete-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    background-color: #fff;
+    z-index: 1;
+}
+  
+  /* Style the "List Item" button */
+button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+  
+  /* Add some margin to the top of the suggestions container */
+#suggestions {
+    margin-top: 5px;
+}
+  
+  /* Apply other styling as needed */
+
+#login-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+}
+    
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+* {
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Styling the main container */
+.container {
+    width: 80%;
+    margin: auto;
+    margin-top: 2rem;
+    letter-spacing: 0.5px;
+    height: 80%;
+}
+
+#img2 {
+    width: 50px;
+    vertical-align: middle;
+    border-style: none;
+    border-radius: 100%;
+}
+/* Styling the msg-header container */
+.msg-header {
+    border: 1px solid #ccc;
+    width: 100%;
+    height: 10%;
+    border-bottom: none;
+    display: inline-block;
+    background-color: #efefef;
+    margin: 0;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+/* Styling the profile picture */
+.msgimg {
+    margin-left: 2%;
+    float: left;
+}
+
+.container1 {
+    width: 270px;
+    height: auto; 
+    float: left;
+    margin: 0;
+}
+
+/* styling user-name */
+.active {
+    width: 150px;
+    float: left;
+    color: black;
+    font-weight: bold;
+    margin: 0 0 0 5px;
+    height: 10%;
+ 
+}
+/* Styling the inbox */
+.chat-page {
+    padding: 0 0 50px 0;
+}
+
+.msg-inbox {
+    border: 1px solid #ccc;
+    overflow: hidden;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+
+.chats {
+    padding: 30px 15px 0 25px;
+}
+
+.msg-page {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Styling the msg-bottom container */
+ .msg-bottom {
+        border-top: 1px solid #ccc;
+        position: relative;
+        height: 11%;
+        background-color: rgb(239 239 239);
+    }
+/* Styling the input field */
+    .input-group {
+        float: right;
+        margin-top: 13px;
+        margin-right: 20px;
+        outline: none !important;
+        border-radius: 20px;
+        width: 61% !important;
+        background-color: #fff;
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+    }
+    
+    .input-group>.form-control {
+        position: relative;
+        flex: 1 1 auto;
+        width: 1%;
+        margin-bottom: 0;
+    }
+    
+    .form-control {
+        border: none !important;
+        border-radius: 20px !important;
+        display: block;
+        height: calc(2.25rem + 2px);
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+    
+    .input-group-text {
+        background: transparent !important;
+        border: none !important;
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+        margin-bottom: 0;
+        font-size: 1.5rem;
+        font-weight: b;
+        line-height: 1.5;
+        color: #495057;
+        text-align: center;
+        white-space: nowrap;
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        font-weight: bold !important;
+        cursor: pointer;
+    }
+    
+    input:focus {
+        outline: none;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .send-icon {
+        font-weight: bold !important;
+    }
+
+/* Styling the avatar  */
+received-chats-img {
+    display: inline-block;
+    width: 50px;
+}
+
+.received-msg {
+    display: inline-block;
+    padding: 0 0 0 10px;
+    vertical-align: top;
+    width: 92%;
+}
+.received-msg-inbox {
+    width: 57%;
+}
+
+.received-msg-inbox p {
+    background: #efefef none repeat scroll 0 0;
+    border-radius: 10px;
+    color: #646464;
+    font-size: 14px;
+    margin-left: 1rem;
+    padding: 1rem;
+    width: 100%;
+    box-shadow: rgb(0 0 0 / 25%) 0px 5px 5px 2px;
+}
+    p {
+    overflow-wrap: break-word;
+}
+
+/* Styling the msg-sent time  */
+.time {
+    color: #777;
+    display: block;
+    font-size: 12px;
+    margin: 8px 0 0;
+}
+.outgoing-chats {
+    overflow: hidden;
+    margin: 26px 20px;
+}
+
+.outgoing-chats-msg p {
+    background-color: #4CAF50;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #fff;
+    padding: 5px 10px 5px 12px;
+    width: 100%;
+    padding: 1rem;
+    box-shadow: rgb(0 0 0 / 25%) 0px 2px 5px 2px;
+}
+.outgoing-chats-msg {
+        float: right;
+        width: 46%;
+    }
+
+/* Styling the avatar */
+.outgoing-chats-img {
+    display: inline-block;
+    width: 50px;
+    margin-right: 1rem;
+}
+@media only screen and (max-device-width: 850px) {
+    *,
+    .time {
+        font-size: 28px;
+    }
+    img {
+        width: 65px;
+    }
+    .msg-header {
+        height: 5%;
+    }
+    .msg-page {
+        max-height: none;
+    }
+    .received-msg-inbox p {
+        font-size: 28px;
+    }
+    .outgoing-chats-msg p {
+        font-size: 28px;
+    }
+}
+
+@media only screen and (max-device-width: 450px) {
+    *,
+    .time {
+        font-size: 28px;
+    }
+    img {
+        width: 65px;
+    }
+    .msg-header {
+        height: 5%;
+    }
+    .msg-page {
+        max-height: none;
+    }
+    .received-msg-inbox p {
+        font-size: 28px;
+    }
+    .outgoing-chats-msg p {
+        font-size: 28px;
+    }
+}
+
+
+
+

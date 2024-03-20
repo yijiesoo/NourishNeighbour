@@ -1,0 +1,39 @@
+{% extends "homepage.html" %}
+
+{% block title %}
+    Contact Me
+{% endblock %}
+
+{% block body %}
+<section class ="contact-form">
+    <div class="container">
+        <div class ="row d-flex justify-content-between">
+            <div class="col-md-3-mx-auto">
+                <h2>How to contact me directly</h2>
+                <label for="salutation">Choose Salutation:</label>
+                    <select id="salutation" name="salutation">
+                        <option value=""> </option>
+                        <option value="Mr">Mr</option>
+                        <option value="Ms">Ms</option>
+                        <option value="Mrs">Mrs</option>
+                        <option value="Mdm">Mdm</option>
+                        <option value="Dr">Dr</option>
+                        <option value="Others">Others</option>
+                    </select>
+                <label for="name"> Name (as in fullname) </label>
+                <input type="text" id="name" maxlength ="40" size="40">
+                <label for="handphone">Handphone Number</label>
+                <input type="text" id ="hp" maxlength ="8" size="40">
+                <label for ="email"> Email </label>
+                <input type ="text" id="email" maxlength ="40" size="40">
+                <label for="subject"> Subject</label>
+                <input type ="text" id="subject" maxlength ="40" size="40" >
+                <label for="message">Message(max: 200 words)</label>
+                <textarea id="message" rows="5" cols="40"></textarea>
+                <button type="submit" class="nice-button"> Send </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

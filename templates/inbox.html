@@ -1,0 +1,23 @@
+{% extends 'homepage.html' %}
+
+{% block title %}
+    Inbox
+{% endblock %}
+
+{% block content %}
+    <h1>Inbox</h1>
+    
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message">
+                <p><strong>From:</strong> {{ message.sender.username }}</p>
+                <p><strong>Received:</strong> {{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <p><strong>Message:</strong> {{ message.content }}</p>
+                <a href="{{ url_for('reply', message_id=message.id) }}">Reply</a>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <a href="{{ url_for('send_message') }}" class="btn btn-primary">Compose a Message</a>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "homepage.html" %}
+
+{% block title %}
+    Log in 
+{% endblock %}
+
+{% block body %}
+
+    <div id="login-container">
+        <h1>Login</h1>
+        <form action="/login" method="post">
+            <!-- Login form fields go here -->
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control" id="username" name="username" placeholder="Username" type="text">
+            </div>
+            <div class="mb-3">
+                <input class="form-control" id="password" name="password" placeholder="Password" type="password">
+            </div>
+            <button class="btn btn-primary" type="submit">Log In</button>
+        </form>
+        <div id="register">
+            <p>Don't have an account? <a href="{{url_for('register')}}" id="switch-to-register">Register here</a></p>
+        </div>
+    </div>
+
+{% endblock %}

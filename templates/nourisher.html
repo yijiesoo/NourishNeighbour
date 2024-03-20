@@ -1,0 +1,69 @@
+{% extends "homepage.html" %}
+
+{% block title %}
+    Nourisher
+{% endblock %}
+
+{% block body %}
+<h1> List your food items down below </h1>
+<p> Do try to refrain from sharing perishable items </p>
+<!-- HTML for Item Listing Form -->
+<form action="/nourisher" method="post" enctype="multipart/form-data">
+    <input type="text" name="title" placeholder="Title" required>
+    <textarea name="description" placeholder="Description of product..." required></textarea>
+    <input type="number" name="quantity" placeholder="Quantity" required min ="1">
+    <textarea type="text" name="ingredients" placeholder="Ingredients" required></textarea> 
+    <label for id="expiry_date">Expiry Date of product: </label>
+    <input type="date" id="expiry_date" name="expiry_date" placeholder="Expiry date of product: " required>
+    <script>
+        // Get the current date in the format "YYYY-MM-DD"
+        const currentDate = new Date().toISOString().split('T')[0];
+        
+        // Set the 'min' attribute of the date input element to the current date
+        document.getElementById('expiry_date').min = currentDate;
+    </script>
+    <select name="category">
+        <option value="Vegetables">Vegetables</option>
+        <option value="Fruits">Fruits</option>
+        <option value="Dairy">Dairy Products</option>
+        <option value="Eggs">Eggs</option>
+        <option value="Oil">Oil</option>
+        <option value="Snacks">Snacks And Crackers</option>
+        <option value="Canned">Canned Food</option>
+        <option value="Drinks">Drinks and beverages</option>
+        <option value="Dried">Dried Food</option>
+        <option value="Noodles">Noodles</option>
+        <option value="Rice"> Rice </option>
+        <option value="Cereal"> Cereal </option>
+        <option value="Bread"> Bread </option>
+        <option value="Others">Others</option>
+    </select>
+    <p> If you selected others, please specify: </p>
+    <p> If not please type nil: </p>
+    <input type="text" name="other" id="other" placeholder="Please specify: Others" required>
+    <select type="text" id="locationInput" name="location" placeholder="Type your region..." required> 
+        <option value="Central"> Central </option>
+        <option value="North-East">North-East</option>
+        <option value="North">North</option>
+        <option value="West">West</option>
+        <option value="East">East</option>
+    </select>
+    <button type="submit">List Item</button>
+</form>
+
+{% endblock %}
+<!-- Include jQuery library -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Include jQuery UI library -->
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+    function formatDate() {
+        const datepicker = document.getElementById("expiry_date");
+        const selectedDate = datepicker.value;
+        const isoDate = new Date(selectedDate).toISOString().split("T")[0];
+        datepicker.value = isoDate;
+    }
+
+</script>

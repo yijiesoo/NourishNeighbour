@@ -8,7 +8,7 @@ Nourished
     <h1>Listing Filter</h1>
     
     <form method="POST" action="/nourished">
-        <label for="allergies">Allergies/ Dietary Restrictions(if any):</label>
+        <label for="allergies">Allergies/ Dietary Restrictions (if any):</label>
         <input type="text" name="allergy" id="allergy">
         <input type="submit" value="Submit">
     </form>
@@ -73,7 +73,7 @@ Nourished
                             var itemHtml = '<div class="item">' +
                                 '<a href="' + chatUrl + '">' + '<h2>' + item.title + '</h2>' + '</a>' +
                                 '<p>Category: ' + item.category + '</p>' +
-                                '<p>Other categories(if specified): ' + item.other + '</p>' +
+                                '<p>Other categories (if specified): ' + item.other + '</p>' +
                                 '<p>Ingredients: ' + item.ingredients + '</p>' +
                                 '<p>Quantity: ' + item.quantity + '</p>' +
                                 '<p>Expiry date: ' + item.expiry_date + '</p>' +
@@ -93,10 +93,3 @@ Nourished
     </script>
     
 {% endblock %}
-
-
-
-
-
-
-

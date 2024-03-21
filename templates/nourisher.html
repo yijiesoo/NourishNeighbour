@@ -11,10 +11,10 @@
 <form action="/nourisher" method="post" enctype="multipart/form-data">
     <input type="text" name="title" placeholder="Title" required>
     <textarea name="description" placeholder="Description of product..." required></textarea>
-    <input type="number" name="quantity" placeholder="Quantity" required min ="1">
+    <input type="number" name="quantity" placeholder="Quantity" required min="1">
     <textarea type="text" name="ingredients" placeholder="Ingredients" required></textarea> 
-    <label for id="expiry_date">Expiry Date of product: </label>
-    <input type="date" id="expiry_date" name="expiry_date" placeholder="Expiry date of product: " required>
+    <label for="expiry_date">Expiry Date of product: </label>
+    <input type="date" id="expiry_date" name="expiry_date" placeholder="Expiry date of product:" required>
     <script>
         // Get the current date in the format "YYYY-MM-DD"
         const currentDate = new Date().toISOString().split('T')[0];
@@ -33,14 +33,19 @@
         <option value="Drinks">Drinks and beverages</option>
         <option value="Dried">Dried Food</option>
         <option value="Noodles">Noodles</option>
-        <option value="Rice"> Rice </option>
-        <option value="Cereal"> Cereal </option>
-        <option value="Bread"> Bread </option>
+        <option value="Rice">Rice</option>
+        <option value="Cereal">Cereal</option>
+        <option value="Bread">Bread</option>
         <option value="Others">Others</option>
     </select>
     <p> If you selected others, please specify: </p>
-    <p> If not please type nil: </p>
+    <p> If not, please type nil: </p>
     <input type="text" name="other" id="other" placeholder="Please specify: Others" required>
+    
+    <!-- Add input for image upload -->
+    <label for="image">Add Image:</label>
+    <input type="file" name="image" id="image" accept="image/*">
+    
     <select type="text" id="locationInput" name="location" placeholder="Type your region..." required> 
         <option value="Central"> Central </option>
         <option value="North-East">North-East</option>

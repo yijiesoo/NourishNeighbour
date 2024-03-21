@@ -8,12 +8,14 @@ from flask_session import Session
 from firebase_admin import credentials, firestore, auth
 import firebase_admin
 from functools import wraps
-from dotenv import load_dotenv
+import random
+import string
+import logging
 
-load_dotenv()
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Initialize Firebase Admin SDK
-cred = credentials.Certificate(os.getenv("keys.json"))
+cred = credentials.Certificate('keys.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -76,20 +78,26 @@ def nourisher():
                 flash("User not logged in.", "danger")
                 return redirect(url_for('login'))
 
-            # Create a new document in the Firestore collection under 'users/user_id'
-            user_doc_ref = db.collection('users').document(user_id)
-            user_doc_ref.set({
+            # Generate a random document ID for the new listing
+            random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+            logging.info(f"Generated document ID: {random_id}")
+            # Create a new document in the Firestore collection with the random ID
+            item_doc_ref = db.collection('listings').document(random_id)
+            item_doc_ref.set({
                 'title': title,
                 'description': description,
                 'category': category,
                 'other': other,
                 'ingredients': ingredients,
                 'quantity': quantity,
-                'expiry_date': expiry_date.strftime('%Y-%m-%d'),  # Format expiry date
+                'expiry_date': expiry_date.strftime('%Y-%m-%d'), # Format expiry date
                 'location': location,
+                'uploadedBy': user_id # Add uploadedBy field with current user's ID
             })
 
+            logging.info(f"Document created successfully with ID: {random_id}")
             flash("Listing created successfully", "success")
+            
             return redirect(url_for('homepage'))
     return render_template('nourisher.html')
 

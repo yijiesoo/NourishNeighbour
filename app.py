@@ -5,7 +5,7 @@ from tempfile import mkdtemp
 import os
 from datetime import datetime
 from flask_session import Session
-from firebase_admin import credentials, firestore, auth
+from firebase_admin import credentials, firestore, auth, storage
 import firebase_admin
 from functools import wraps
 import random
@@ -16,8 +16,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate('keys.json')
-firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app(cred, {
+    'storageBucket': 'rizzly-1703408404027.appspot.com'  
+})
 db = firestore.client()
+bucket = storage.bucket()
 
 # Configure application
 app = Flask(__name__)
@@ -61,7 +64,43 @@ def nourisher():
         quantity = int(request.form.get('quantity'))  
         expiry_date = request.form.get('expiry_date')  
         location = request.form.get('location')
-        
+
+        # Initialize logger
+        logger = logging.getLogger(__name__)
+
+        # Define allowed content types for images
+        ALLOWED_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+
+        # Handle image upload
+        if 'image' in request.files:
+            image_file = request.files['image']
+            if image_file.filename != '':
+                # Check if the content type of the uploaded file is allowed
+                if image_file.content_type not in ALLOWED_CONTENT_TYPES:
+                    flash('Invalid image type. Please upload a JPEG, PNG, GIF, or WebP image.', 'danger')
+                    return redirect(url_for('nourisher'))
+                
+                try:
+                    # Generate a random filename for the image
+                    filename = ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + os.path.splitext(image_file.filename)[1]
+                    
+                    # Upload image to Firebase Storage
+                    blob = bucket.blob(filename)
+                    blob.upload_from_string(
+                        image_file.read(),
+                        content_type=image_file.content_type
+                    )
+                    
+                    # Get the URL of the uploaded image
+                    image_url = blob.public_url
+
+                    logger.info("Image uploaded successfully")
+                except Exception as e:
+                    # Log error and handle upload error
+                    logger.error(f"Error uploading image: {e}")
+                    flash("Error uploading image. Please try again later.", "danger")
+                    return redirect(url_for('nourisher'))
+
         # Validate data (e.g., required fields, numeric values)
         if not title or not description or not category or not location:
             flash("Please fill in all required fields", "danger")
@@ -80,7 +119,6 @@ def nourisher():
 
             # Generate a random document ID for the new listing
             random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-            logging.info(f"Generated document ID: {random_id}")
             # Create a new document in the Firestore collection with the random ID
             item_doc_ref = db.collection('listings').document(random_id)
             item_doc_ref.set({
@@ -90,12 +128,13 @@ def nourisher():
                 'other': other,
                 'ingredients': ingredients,
                 'quantity': quantity,
-                'expiry_date': expiry_date.strftime('%Y-%m-%d'), # Format expiry date
+                'expiry_date': expiry_date.strftime('%Y-%m-%d'), 
                 'location': location,
-                'uploadedBy': user_id # Add uploadedBy field with current user's ID
+                'uploadedBy': user_id,
+                'image_url': image_url 
             })
 
-            logging.info(f"Document created successfully with ID: {random_id}")
+            logger.info("Listing created successfully")
             flash("Listing created successfully", "success")
             
             return redirect(url_for('homepage'))

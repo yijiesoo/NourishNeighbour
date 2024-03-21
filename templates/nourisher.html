@@ -1,7 +1,7 @@
 {% extends "homepage.html" %}
 
 {% block title %}
-    Nourisher
+Nourisher
 {% endblock %}
 
 {% block body %}
@@ -12,13 +12,13 @@
     <input type="text" name="title" placeholder="Title" required>
     <textarea name="description" placeholder="Description of product..." required></textarea>
     <input type="number" name="quantity" placeholder="Quantity" required min="1">
-    <textarea type="text" name="ingredients" placeholder="Ingredients" required></textarea> 
+    <textarea type="text" name="ingredients" placeholder="Ingredients" required></textarea>
     <label for="expiry_date">Expiry Date of product: </label>
     <input type="date" id="expiry_date" name="expiry_date" placeholder="Expiry date of product:" required>
     <script>
         // Get the current date in the format "YYYY-MM-DD"
         const currentDate = new Date().toISOString().split('T')[0];
-        
+
         // Set the 'min' attribute of the date input element to the current date
         document.getElementById('expiry_date').min = currentDate;
     </script>
@@ -41,12 +41,12 @@
     <p> If you selected others, please specify: </p>
     <p> If not, please type nil: </p>
     <input type="text" name="other" id="other" placeholder="Please specify: Others" required>
-    
+
     <!-- Add input for image upload -->
     <label for="image">Add Image:</label>
     <input type="file" name="image" id="image" accept="image/*">
-    
-    <select type="text" id="locationInput" name="location" placeholder="Type your region..." required> 
+
+    <select type="text" id="locationInput" name="location" placeholder="Type your region..." required>
         <option value="Central"> Central </option>
         <option value="North-East">North-East</option>
         <option value="North">North</option>

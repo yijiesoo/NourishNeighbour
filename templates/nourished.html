@@ -13,10 +13,9 @@ Nourished
         <input type="submit" value="Submit">
     </form>
     
-
     <label for="category-filter">Select a category:</label>
     <select id="category-filter">
-        <option value="all">All Categories</option>
+        <option value="all" selected>All Categories</option>
         <option value="Vegetables">Vegetables</option>
         <option value="Fruits">Fruits</option>
         <option value="Dairy">Dairy Products</option>
@@ -43,6 +42,9 @@ Nourished
          var chatUrl = "{{ url_for('chat') }}";
 
         $(document).ready(function () {
+            // Trigger the filterItems function immediately upon page load
+            filterItems();
+
             // Attach an event listener to the category filter select element
             $('#category-filter').on('change', function () {
                 filterItems();
@@ -69,7 +71,7 @@ Nourished
     
                         // Append the filtered data to the content container
                         $.each(data, function (index, item) {
-                        // Customize this part to display your item data as you like
+                            // Customize this part to display your item data as you like
                             var itemHtml = '<div class="item">' +
                                 '<a href="' + chatUrl + '">' + '<h2>' + item.title + '</h2>' + '</a>' +
                                 '<p>Category: ' + item.category + '</p>' +
@@ -78,6 +80,8 @@ Nourished
                                 '<p>Quantity: ' + item.quantity + '</p>' +
                                 '<p>Expiry date: ' + item.expiry_date + '</p>' +
                                 '<p>Location of nourisher: ' + item.location + '</p>' +
+                                // Add the image using the image URL
+                                '<img src="' + item.image_url + '" alt="' + item.title + '">' +
                                 // Add more item details as needed
                             '</div>';
                             $('#filtered-content').append(itemHtml);

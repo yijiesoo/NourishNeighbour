@@ -1,0 +1,16 @@
+{% extends "homepage.html" %}
+
+{% block title %}
+    Profile settings
+{% endblock %}
+
+{% block body %}
+
+<h1> Profile Screen </h1>
+<p> Change Profile Picture </p>
+<form action="{{ url_for('profile') }}" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="submit" value="Upload">
+</form>
+
+{% endblock %}

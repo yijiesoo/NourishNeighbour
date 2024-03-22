@@ -34,16 +34,20 @@
                                 nourished!</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('about') }}">About Us </a></li>
                         <li class="nav-item"><a class="nav-link" href="{{url_for('contact')}}">Contact Us</a></li>
-                        <img class="profile-image" src="\static\default-profile-image.png" alt="Profile photo">
+                        <li class="nav-item">
+                            <a id="profile-image-link" href="{{ url_for('profile') }}">
+                                <img class="profile-image" src="{% if profile_picture_url %}{{ profile_picture_url }}{% else %}/static/default-profile-image.png{% endif %}" alt="Profile photo">
+                            </a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav ms-auto mt-2">
                         {% if session["user_id"] %}
-                            <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                         {% else %}
-                            <div id="login-container">
-                                <li class="nav-item"><a class="nav-link" href="{{url_for('login')}}">Log In</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{url_for('register')}}">Register</a></li>
-                            </div>
+                        <div id="login-container">
+                            <li class="nav-item"><a class="nav-link" href="{{url_for('login')}}">Log In</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{url_for('register')}}">Register</a></li>
+                        </div>
                         {% endif %}
                     </ul>
                 </nav>

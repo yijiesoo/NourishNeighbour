@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from tempfile import mkdtemp
 import os
 from datetime import datetime
@@ -41,7 +43,8 @@ def login_required(f):
 
 @app.route('/')
 def homepage():
-    return render_template('homepage.html')
+    profile_picture_url = request.args.get('profile_picture_url')
+    return render_template('homepage.html', profile_picture_url=profile_picture_url)
 
 @app.route('/about')
 def about():
@@ -51,6 +54,76 @@ def about():
 def chat():
     return render_template('chat.html')
 
+ALLOWED_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_CONTENT_TYPES
+
+def get_profile_picture_url(user_id):
+    doc_ref = db.collection('profile_pictures').document(user_id)
+    doc = doc_ref.get()
+    if doc.exists:
+        return doc.to_dict().get('imageURL')
+    else:
+        return None
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        if request.method == 'POST':
+            if 'file' not in request.files:
+                flash('No file part.', 'error')
+                return redirect(request.url)
+            file = request.files['file']
+            if file.filename == '':
+                flash('No selected file.', 'error')
+                return redirect(request.url)
+            if file and file.content_type in ALLOWED_CONTENT_TYPES:
+                # Generate a random filename for the image
+                filename = ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + os.path.splitext(file.filename)[1]
+
+                try:
+                    # Upload image to Firebase Storage in the "profile_pictures" directory
+                    bucket = storage.bucket()
+                    blob = bucket.blob('profile_pictures/' + filename)
+                    blob.upload_from_string(
+                        file.read(),
+                        content_type=file.content_type
+                    )
+
+                    # Get the URL of the uploaded image
+                    image_url = blob.public_url
+
+                    # Add image URL to Firestore
+                    db = firestore.client()
+                    doc_ref = db.collection('profile_pictures').document(user_id)
+                    doc_ref.set({
+                        'imageURL': image_url
+                    })
+
+                    flash('Successfully uploaded picture.', 'success')
+                    return redirect(url_for('uploaded_file', filename=filename))
+                except Exception as e:
+                    flash('Error uploading picture. Please try again.', 'error')
+                    return redirect(request.url)
+        else:
+            # Check if profile picture exists for the current user
+            db = firestore.client()
+            doc_ref = db.collection('profile_pictures').document(user_id)
+            doc = doc_ref.get()
+            if doc.exists:
+                # Profile picture exists, use it
+                profile_picture_url = doc.to_dict().get('imageURL')
+            else:
+                # Profile picture does not exist, use default profile picture
+                profile_picture_url = url_for('static', filename='default-profile-image.png')
+
+            return render_template('profile.html', profile_picture_url=profile_picture_url)
+    else:
+        return redirect(url_for('login'))
+    
 @app.route('/nourisher', methods=["GET", "POST"])
 @login_required  
 def nourisher():
@@ -84,8 +157,8 @@ def nourisher():
                     # Generate a random filename for the image
                     filename = ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + os.path.splitext(image_file.filename)[1]
                     
-                    # Upload image to Firebase Storage
-                    blob = bucket.blob(filename)
+                    # Upload image to Firebase Storage in the "listings" directory
+                    blob = bucket.blob('listings/' + filename)
                     blob.upload_from_string(
                         image_file.read(),
                         content_type=image_file.content_type
@@ -167,7 +240,10 @@ def nourished():
             # Filter listings in the selected category that do not contain the user's allergen
             listings = db.collection('listings').where('category', '==', selectedCategory).where('ingredients', 'not-in', [user_allergy]).get()
 
-        return render_template("nourished.html", listings=listings)
+        # Convert the Firestore documents into a list of dictionaries
+        listings_data = [doc.to_dict() for doc in listings]
+
+        return render_template("nourished.html", listings=listings_data)
 
 @app.route('/contact')
 def contact():
@@ -183,7 +259,7 @@ def after_request(response):
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_FILE_DIR"] = mkdtemp()
-app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
@@ -214,7 +290,11 @@ def login():
                 flash("Login successful!", "success")
                 # Store user ID in session
                 session['user_id'] = user.uid
-                return redirect(url_for('homepage'))
+
+                # Get the profile picture URL for the logged-in user
+                profile_picture_url = get_profile_picture_url(user.uid)
+                # Pass the profile picture URL to the homepage template
+                return redirect(url_for('homepage', profile_picture_url=profile_picture_url))
             except auth.UserNotFoundError:
                 flash("Email not found. Please register first.", "danger")
             except Exception as e:

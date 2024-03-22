@@ -27,8 +27,6 @@ bucket = storage.bucket()
 # Configure application
 app = Flask(__name__)
 
-# Your existing Flask app code continues here...
-
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 

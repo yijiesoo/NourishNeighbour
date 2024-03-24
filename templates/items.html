@@ -1,0 +1,20 @@
+{% extends "homepage.html" %}
+
+{% block title %}
+    Item Details
+{% endblock %}
+
+{% block body %}
+    <h1>Item Details</h1>
+    <div>
+        <h2>{{ item.title }}</h2>
+        <p>Description: {{ item.description }}</p>
+        <p>Category: {{ item.category }}</p>
+        <p>Other: {{ item.other }}</p>
+        <p>Ingredients: {{ item.ingredients }}</p>
+        <p>Quantity: {{ item.quantity }}</p>
+        <p>Expiry Date: {{ item.expiry_date }}</p>
+        <p>Location: {{ item.location }}</p>
+        <img src="{{ item.image_url }}" alt="{{ item.title }}">
+    </div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "homepage.html" %}
+
+{% block title %}
+Results
+{% endblock %}
+
+{% block body %}
+<body>
+    <h1>Search Results for "{{ query }}"</h1>
+    <ul>
+        {% for result in results %}
+        <li>{{ result }}</li>
+        {% endfor %}
+    </ul>
+</body>
+{% endblock %}

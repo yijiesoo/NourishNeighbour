@@ -211,37 +211,9 @@ def nourisher():
             return redirect(url_for('homepage'))
     return render_template('nourisher.html')
 
-@app.route('/nourished', methods=['GET', 'POST'])
+@app.route('/nourished')
 def nourished():
-    if request.method == 'POST':
-        # Handle the food allergy form submission
-        allergy = request.form.get('allergy')
-
-        # Create a new document in the Firestore collection
-        new_allergy_ref = db.collection('allergies').document()
-        new_allergy_ref.set({
-            'allergy': allergy
-        })
-
-        # Redirect to the 'nourished' page after form submission
-        return redirect(url_for('nourished'))
-
-    if request.method == 'GET':
-        # Process the category filter
-        selectedCategory = request.args.get('category')
-        user_allergy = request.form.get('allergy')
-
-        # Query the Firestore collection for listings based on the selected category
-        if selectedCategory == 'all':
-            listings = db.collection('listings').get()
-        else:
-            # Filter listings in the selected category that do not contain the user's allergen
-            listings = db.collection('listings').where('category', '==', selectedCategory).where('ingredients', 'not-in', [user_allergy]).get()
-
-        # Convert the Firestore documents into a list of dictionaries
-        listings_data = [doc.to_dict() for doc in listings]
-
-        return render_template("nourished.html", listings=listings_data)
+    return render_template('nourished.html')
 
 @app.route('/contact')
 def contact():
@@ -327,6 +299,41 @@ def register():
 
     return render_template("register.html")
 
+@app.route('/items.html')
+def items():
+    # Get the item ID (document ID) from the request parameters
+    item_id = request.args.get('id')
+
+    # Log the received item ID
+    logging.info(f"Received item ID: {item_id}")
+
+    # Fetch item details from the database based on the item ID
+    if item_id:
+        listing_ref = db.collection('listings').document(item_id)
+        listing_data = listing_ref.get().to_dict()
+
+        # Log fetched listing data
+        logging.info(f"Fetched listing data: {listing_data}")
+
+        if listing_data:
+            # If listing exists, pass its details to the template
+            item_data = {
+                'id': item_id,
+                'title': listing_data.get('title'),
+                'description': listing_data.get('description'),
+                'category': listing_data.get('category'),
+                'other': listing_data.get('other'),
+                'ingredients': listing_data.get('ingredients'),
+                'quantity': listing_data.get('quantity'),
+                'expiry_date': listing_data.get('expiry_date'),
+                'location': listing_data.get('location'),
+                'image_url': listing_data.get('image_url')
+            }
+            return render_template('items.html', item=item_data)
+    
+    # If item ID is not provided or item not found, return a 404 apology
+    return apology("Item not found", 404)
+
 @app.route('/api/getItems', methods=['GET'])
 def get_items():
     selected_category = request.args.get('category')
@@ -355,12 +362,20 @@ def get_items():
     items = query.get()
 
     # Convert the items to a list of dictionaries for JSON serialization
-    item_list = [doc.to_dict() for doc in items]
+    item_list = []
+    for doc in items:
+        item_data = doc.to_dict()
+        item_data['id'] = doc.id  # Add the document ID to the item data
+        item_list.append(item_data)
 
     return jsonify(item_list)
 
+def apology(message, code=404):
+    """Error message 404."""
+    return render_template("apology.html", message=message), code
+
 def apology(message, code=400):
-    """Render message as an apology to user."""
+    """Error message 400."""
     def escape(s):
         """
         Escape special characters.

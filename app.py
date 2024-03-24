@@ -13,6 +13,7 @@ from functools import wraps
 import random
 import string
 import logging
+from flask import g
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -275,6 +276,7 @@ def login():
 @app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        name = request.form.get("name")
         email = request.form.get("email")
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
@@ -287,6 +289,13 @@ def register():
             try:
                 # Create a new user with email and password
                 user = auth.create_user(email=email, password=password)
+
+                # Store user's name in Firestore
+                db = firestore.client()
+                doc_ref = db.collection('names').document(user.uid)
+                doc_ref.set({
+                    'name': name
+                })
                 
                 flash("Registration successful!", "success")
                 return redirect(url_for('homepage'))
@@ -298,6 +307,14 @@ def register():
                 flash("An error occurred during registration. Please try again later.", "danger")
 
     return render_template("register.html")
+
+@app.before_request
+def load_user():
+    user_id = session.get('user_id')
+    if user_id:
+        g.user = user_id
+    else:
+        g.user = None
 
 @app.route('/items.html')
 def items():
@@ -316,6 +333,17 @@ def items():
         logging.info(f"Fetched listing data: {listing_data}")
 
         if listing_data:
+            # Fetch the user ID who uploaded the item
+            uploaded_by_user_id = listing_data.get('uploadedBy')
+
+            # Fetch the user document from Firestore based on the user ID
+            if uploaded_by_user_id:
+                user_ref = db.collection('names').document(uploaded_by_user_id)  # Update collection name to 'names'
+                user_data = user_ref.get().to_dict()
+                uploaded_by = user_data.get('name') if user_data else None
+            else:
+                uploaded_by = None
+
             # If listing exists, pass its details to the template
             item_data = {
                 'id': item_id,
@@ -327,12 +355,12 @@ def items():
                 'quantity': listing_data.get('quantity'),
                 'expiry_date': listing_data.get('expiry_date'),
                 'location': listing_data.get('location'),
-                'image_url': listing_data.get('image_url')
+                'image_url': listing_data.get('image_url'),
+                'uploadedBy': uploaded_by 
             }
             return render_template('items.html', item=item_data)
     
-    # If item ID is not provided or item not found, return a 404 apology
-    return apology("Item not found", 404)
+    return apology("Item not found", 404)  
 
 @app.route('/api/getItems', methods=['GET'])
 def get_items():

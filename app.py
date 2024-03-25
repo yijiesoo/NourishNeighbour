@@ -53,6 +53,41 @@ def about():
 def chat():
     return render_template('chat.html')
 
+@app.route('/name', methods=['GET', 'POST'])
+def name():
+    if 'user_id' not in session:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    db = firestore.client()
+
+    if request.method == 'POST':
+        new_name = request.form.get('new_name')
+        if new_name:
+            # Update the user's name in the Firestore database
+            try:
+                user_ref = db.collection('names').document(user_id)
+                user_ref.update({'name': new_name})
+                flash('Name updated successfully!', 'success')
+            except Exception as e:
+                flash('Error updating name. Please try again.', 'error')
+        else:
+            flash('Please enter a new name.', 'error')
+
+    # Retrieve the current name of the user from Firestore
+    user_doc = db.collection('names').document(user_id).get()
+    current_name = user_doc.get('name') if user_doc.exists else None
+
+    return render_template('name.html', current_name=current_name)
+
+@app.route('/profile')
+def profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    else:
+        return render_template('profile.html')
+
 ALLOWED_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 def allowed_file(filename):
@@ -67,8 +102,8 @@ def get_profile_picture_url(user_id):
     else:
         return None
 
-@app.route('/profile', methods=['GET', 'POST'])
-def profile():
+@app.route('/profilepicture', methods=['GET', 'POST'])
+def profilepicture():
     if 'user_id' in session:
         user_id = session['user_id']
         if request.method == 'POST':
@@ -113,13 +148,12 @@ def profile():
             doc_ref = db.collection('profile_pictures').document(user_id)
             doc = doc_ref.get()
             if doc.exists:
-                # Profile picture exists, use it
-                profile_picture_url = doc.to_dict().get('imageURL')
+                profile_picture_url = doc.to_dict().get('imageURL') 
             else:
                 # Profile picture does not exist, use default profile picture
                 profile_picture_url = url_for('static', filename='default-profile-image.png')
 
-            return render_template('profile.html', profile_picture_url=profile_picture_url)
+            return render_template('profilepicture.html', profile_picture_url=profile_picture_url)
     else:
         return redirect(url_for('login'))
     

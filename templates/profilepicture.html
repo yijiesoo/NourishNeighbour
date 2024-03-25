@@ -1,0 +1,15 @@
+{% extends "profile.html" %}
+
+{% block title %}
+        Set Up Profile Picture
+{% endblock %}
+
+{% block body %}
+
+<p> Change Your Profile Picture </p>
+<form action="{{ url_for('profilepicture') }}" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="submit" value="Upload">
+</form>
+
+{% endblock %}

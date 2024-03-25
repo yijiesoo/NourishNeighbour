@@ -16,6 +16,7 @@ Item Details
     <p>Expiry Date: {{ item.expiry_date }}</p>
     <p>Location: {{ item.location }}</p>
     <p>Uploaded By: {{ item.uploadedBy }}</p> 
+    <button onclick="handleWantButtonClick()">I want it!</button>
     <img src="{{ item.image_url }}" alt="{{ item.title }}">
 </div>
 {% endblock %}

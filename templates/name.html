@@ -1,0 +1,19 @@
+{% extends "profile.html" %}
+
+{% block title %}
+Change your name
+{% endblock %}
+
+{% block body %}
+
+<h1> Change Your Name </h1>
+
+<p>Current Name: {{ current_name }}</p>
+
+<form action="{{ url_for('name') }}" method="post">
+    <label for="new_name">New Name:</label><br>
+    <input type="text" id="new_name" name="new_name"><br><br>
+    <input type="submit" value="Submit">
+</form>
+
+{% endblock %}

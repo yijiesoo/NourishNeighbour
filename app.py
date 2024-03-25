@@ -53,6 +53,34 @@ def about():
 def chat():
     return render_template('chat.html')
 
+@app.route('/myListing')
+def myListing():
+    if 'user_id' not in session:
+        # User is not logged in, redirect to login page
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    db = firestore.client()
+
+    # Retrieve user's listings from Firestore
+    my_listings = []
+    listings_ref = db.collection('listings').where('uploadedBy', '==', user_id).get()
+    for doc in listings_ref:
+        listing_data = doc.to_dict()
+        my_listings.append({
+            'title': listing_data.get('title'),
+            'description': listing_data.get('description'),
+            'category': listing_data.get('category'),
+            'other': listing_data.get('other'),
+            'ingredients': listing_data.get('ingredients'),
+            'quantity': listing_data.get('quantity'),
+            'expiry_date': listing_data.get('expiry_date'),
+            'location': listing_data.get('location'),
+            'image_url': listing_data.get('image_url')
+        })
+
+    return render_template('myListing.html', my_listings=my_listings)
+
 @app.route('/name', methods=['GET', 'POST'])
 def name():
     if 'user_id' not in session:

@@ -1,0 +1,29 @@
+{% extends "homepage.html" %}
+
+{% block title %}
+    My Listings
+{% endblock %}
+
+{% block body %}
+    <h1>My Listings</h1>
+    {% if my_listings %}
+        <ul>
+        {% for listing in my_listings %}
+            <li>
+                <h2>{{ listing.title }}</h2>
+                <p>Description: {{ listing.description }}</p>
+                <p>Category: {{ listing.category }}</p>
+                <p>Other: {{ listing.other }}</p>
+                <p>Ingredients: {{ listing.ingredients }}</p>
+                <p>Quantity: {{ listing.quantity }}</p>
+                <p>Expiry Date: {{ listing.expiry_date }}</p>
+                <p>Location: {{ listing.location }}</p>
+                <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no listings. Would you like to be a nourisher?</p>
+        <a href="{{ url_for('nourisher') }}">Become a nourisher today!</a>
+    {% endif %}
+{% endblock %}

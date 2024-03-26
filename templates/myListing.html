@@ -19,6 +19,10 @@
                 <p>Expiry Date: {{ listing.expiry_date }}</p>
                 <p>Location: {{ listing.location }}</p>
                 <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+                <form method="POST">
+                    <input type="hidden" name="doc_id" value="{{ listing.id }}">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
             </li>
         {% endfor %}
         </ul>

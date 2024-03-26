@@ -53,21 +53,30 @@ def about():
 def chat():
     return render_template('chat.html')
 
-@app.route('/myListing')
+@app.route('/myListing', methods=['GET', 'POST'])
 def myListing():
     if 'user_id' not in session:
-        # User is not logged in, redirect to login page
         return redirect(url_for('login'))
 
     user_id = session['user_id']
     db = firestore.client()
 
-    # Retrieve user's listings from Firestore
+    if request.method == 'POST':
+        # Handle delete request
+        doc_id_to_delete = request.form.get('doc_id')
+        if doc_id_to_delete:
+            print("Deleting document with ID:", doc_id_to_delete)  
+            db.collection('listings').document(doc_id_to_delete).delete()
+            flash('Listing deleted successfully', 'success')
+            return redirect(url_for('myListing'))
+
     my_listings = []
     listings_ref = db.collection('listings').where('uploadedBy', '==', user_id).get()
     for doc in listings_ref:
+        print("Retrieved document with ID:", doc.id)
         listing_data = doc.to_dict()
         my_listings.append({
+            'id': doc.id,  
             'title': listing_data.get('title'),
             'description': listing_data.get('description'),
             'category': listing_data.get('category'),
@@ -84,7 +93,6 @@ def myListing():
 @app.route('/name', methods=['GET', 'POST'])
 def name():
     if 'user_id' not in session:
-        # User is not logged in, redirect to login page
         return redirect(url_for('login'))
 
     user_id = session['user_id']
@@ -93,7 +101,6 @@ def name():
     if request.method == 'POST':
         new_name = request.form.get('new_name')
         if new_name:
-            # Update the user's name in the Firestore database
             try:
                 user_ref = db.collection('names').document(user_id)
                 user_ref.update({'name': new_name})
@@ -103,7 +110,6 @@ def name():
         else:
             flash('Please enter a new name.', 'error')
 
-    # Retrieve the current name of the user from Firestore
     user_doc = db.collection('names').document(user_id).get()
     current_name = user_doc.get('name') if user_doc.exists else None
 

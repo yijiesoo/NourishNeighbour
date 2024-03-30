@@ -156,6 +156,17 @@ footer {
     z-index: 2; /* Ensure it's on top of other content */
 }
 
+.fas.fa-comment-alt {
+    float: right;
+    position: absolute;
+    top: 10px;
+    right: 70px; /* Adjust the value to move the icon to the left */
+    margin: 10px; /* Adjust the margin to your preference */
+    color: #F0F0F0; /* Set the color of the icon */
+    font-size: 36px; /* Adjust the font size to your preference */
+    z-index: 2; /* Ensure it's on top of other content */
+}
+
 /* Apply styles to the form and form elements */
 form {
     max-width: 600px;

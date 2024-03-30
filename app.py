@@ -10,6 +10,7 @@ from flask_session import Session
 from firebase_admin import credentials, firestore, auth, storage
 import firebase_admin
 from functools import wraps
+from flask_socketio import SocketIO, emit, join_room, leave_room
 import random
 import string
 import logging
@@ -30,6 +31,7 @@ app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+socketio = SocketIO(app)
 
 def login_required(f):
     @wraps(f)
@@ -49,9 +51,13 @@ def homepage():
 def about():
     return render_template('about.html')
 
-@app.route('/chat')
-def chat():
-    return render_template('chat.html')
+@app.route('/chatrooms')
+def chatrooms():
+    return render_template('chatrooms.html')
+
+@app.route('/chats')
+def chats():
+    return render_template('chats.html')
 
 @app.route('/myListing', methods=['GET', 'POST'])
 def myListing():
@@ -428,7 +434,24 @@ def items():
             }
             return render_template('items.html', item=item_data)
     
-    return apology("Item not found", 404)  
+    return apology("Item not found", 404)
+
+@app.route('/create_chatroom', methods=['POST'])
+def create_chatroom():
+    current_user_id = session['user_id']  # Implement this function to get the current user's ID
+    if current_user_id:
+        item_id = request.form.get('item_id')
+        uploaded_by_id = request.form.get('uploaded_by_id')
+        if item_id and uploaded_by_id:
+            chatroom_id = f"{current_user_id}_{uploaded_by_id}"
+            db.collection('private_chats').document(chatroom_id).set({
+                # Add any additional fields you want to store in the chatroom document
+            })
+            return jsonify({'chatroom_id': chatroom_id}), 200
+        else:
+            return jsonify({'error': 'Missing item ID or uploaded by ID'}), 400
+    else:
+        return jsonify({'error': 'User not logged in'}), 401
 
 @app.route('/api/getItems', methods=['GET'])
 def get_items():
@@ -461,7 +484,7 @@ def get_items():
     item_list = []
     for doc in items:
         item_data = doc.to_dict()
-        item_data['id'] = doc.id  # Add the document ID to the item data
+        item_data['id'] = doc.id  
         item_list.append(item_data)
 
     return jsonify(item_list)
@@ -496,10 +519,4 @@ for code in default_exceptions:
 
 
 if __name__ == '__main__':
-    app.run()
-
-
-
-
-
-
+    socketio.run(app, debug=True)

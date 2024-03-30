@@ -6,6 +6,7 @@
     <meta name="viewport" content="initial-scale=1, width=device-width">
     <link rel="stylesheet" type="text/css" href="/static/styles.css">
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="/static/script.js"></script>
     <title>NourishNeighbour: {% block title %}Homepage{% endblock %}</title>
 </head>
@@ -40,6 +41,11 @@
                                 <img class="profile-image" src="{% if profile_picture_url %}{{ profile_picture_url }}{% else %}/static/default-profile-image.png{% endif %}" alt="Profile photo">
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a id="chatrooms-icon-link" href="{{ url_for('chatrooms') }}">
+                                <i class="fas fa-comment-alt"></i>
+                            </a>
+                        </li>                        
                     </ul>
                     <ul class="navbar-nav ms-auto mt-2">
                         {% if session["user_id"] %}

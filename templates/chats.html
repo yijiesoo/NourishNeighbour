@@ -1,0 +1,79 @@
+{% extends "homepage.html" %}
+
+{% block title %}
+    Chat to collect your food items here! : 
+{% endblock %}
+
+{% block body %}
+    <!-- Main container -->
+    <div class="container">
+      <!-- msg-header section starts -->
+      <div class="msg-header">
+        <div class="container1">
+          <img2 src="static\default-profile-picture-male-icon.png" class="msgimg" />
+          <div class="active">
+            <p>NourishNeighbour</p>
+          </div>
+        </div>
+      </div>
+      <!-- msg-header section ends -->
+
+      <!-- Chat inbox  -->
+      <div class="chat-page">
+        <div class="msg-inbox">
+          <div class="chats">
+            <!-- Message container -->
+            <div class="msg-page">
+              <!-- Incoming messages -->
+              <!-- Your incoming message code goes here -->
+
+              <!-- Outgoing messages -->
+              <!-- Your outgoing message code goes here -->
+            </div>
+          </div>
+
+          <!-- msg-bottom section -->
+          <div class="msg-bottom">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Write message..."
+                id="message-input" 
+              />
+
+              <span class="input-group-text send-icon" id="send-button">
+                <i class="bi bi-send"></i> Send <!-- Added id attribute -->
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // When the send button is clicked
+            $("#send-button").click(function() {
+                // Get the message content from the input field
+                var messageContent = $("#message-input").val();
+
+                // Send an AJAX request to the Flask route to send the message
+                $.ajax({
+                    type: "POST",
+                    url: "/send_message",
+                    data: { message: messageContent },
+                    success: function(response) {
+                        // Handle success response if needed
+                        console.log(response);
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error response if needed
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -59,6 +59,25 @@ def chatrooms():
 def chats():
     return render_template('chats.html')
 
+@app.route('/send_message', methods=['POST'])
+@login_required
+def send_message():
+    message_content = request.form.get('message')
+    current_user_id = session.get('user_id')
+    if current_user_id:
+        try:
+            # Create a subcollection called "messages" and add a document with the specified structure
+            db.collection('private_chats').document(current_user_id).collection('messages').document().set({
+                'message': message_content,
+                'timestamp': datetime.now(),
+                'uploadedBy': current_user_id
+            })
+            return jsonify({'success': True}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'User not logged in'}), 401
+
 @app.route('/myListing', methods=['GET', 'POST'])
 def myListing():
     if 'user_id' not in session:

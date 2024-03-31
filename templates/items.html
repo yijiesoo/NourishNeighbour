@@ -36,8 +36,8 @@ Item Details
             // Make a POST request to create chatroom
             $.post('/create_chatroom', { item_id: itemId, uploaded_by_id: uploadedById })
                 .done(function (data) {
-                    // Redirect to the chatroom page or perform any other action
-                    console.log('Chatroom created:', data.chatroom_id);
+                    // Redirect to the chats page after creating the chatroom
+                    window.location.href = '/chats';
                 })
                 .fail(function (xhr, status, error) {
                     // Handle failure

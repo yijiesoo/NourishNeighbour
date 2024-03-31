@@ -449,7 +449,8 @@ def items():
                 'expiry_date': listing_data.get('expiry_date'),
                 'location': listing_data.get('location'),
                 'image_url': listing_data.get('image_url'),
-                'uploadedBy': uploaded_by 
+                'uploadedBy': uploaded_by,
+                'uploadedByUserId': uploaded_by_user_id,
             }
             return render_template('items.html', item=item_data)
     
@@ -457,20 +458,28 @@ def items():
 
 @app.route('/create_chatroom', methods=['POST'])
 def create_chatroom():
-    current_user_id = session['user_id']  # Implement this function to get the current user's ID
-    if current_user_id:
-        item_id = request.form.get('item_id')
-        uploaded_by_id = request.form.get('uploaded_by_id')
-        if item_id and uploaded_by_id:
-            chatroom_id = f"{current_user_id}_{uploaded_by_id}"
-            db.collection('private_chats').document(chatroom_id).set({
-                # Add any additional fields you want to store in the chatroom document
-            })
-            return jsonify({'chatroom_id': chatroom_id}), 200
-        else:
-            return jsonify({'error': 'Missing item ID or uploaded by ID'}), 400
-    else:
+    # Ensure the user is logged in
+    if 'user_id' not in session:
         return jsonify({'error': 'User not logged in'}), 401
+
+    current_user_id = session['user_id']
+    item_id = request.form.get('item_id')
+    uploaded_by_id = request.form.get('uploaded_by_id')
+
+    # Validate input
+    if not item_id or not uploaded_by_id:
+        return jsonify({'error': 'Missing item ID or uploaded by ID'}), 400
+
+    # Generate chatroom ID by concatenating user IDs
+    chatroom_id = f"{current_user_id}_{uploaded_by_id}"
+
+    # Create chatroom document in Firestore
+    db.collection('private_chats').document(chatroom_id).set({
+        # Add any additional fields you want to store in the chatroom document
+    })
+
+    # Return chatroom ID in the response
+    return jsonify({'chatroom_id': chatroom_id}), 200
 
 @app.route('/api/getItems', methods=['GET'])
 def get_items():

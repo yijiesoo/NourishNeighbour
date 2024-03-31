@@ -6,7 +6,8 @@ Item Details
 
 {% block body %}
 <h1>Item Details</h1>
-<button class="want-it-btn" data-item-id="{{ item.id }}" data-uploaded-by-id="{{ item.uploadedBy }}">I Want It</button>
+<button class="want-it-btn" data-item-id="{{ item.id }}" data-uploaded-by-user-id="{{ item.uploadedByUserId }}">I Want
+    It</button>
 <div>
     <h2>{{ item.title }}</h2>
     <p>Description: {{ item.description }}</p>
@@ -23,27 +24,21 @@ Item Details
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
-        // Define the URL for the create chatroom endpoint
         var createChatroomUrl = "/create_chatroom";
 
-        // Attach a click event listener to the "I want it" buttons
         $(document).on('click', '.want-it-btn', function () {
-            // Get the item ID associated with the button
             var itemId = $(this).data('item-id');
-            // Get the uploaded by ID associated with the button
-            var uploadedById = $(this).data('uploaded-by-id');
+            var uploadedById = $(this).data('uploaded-by-user-id'); 
 
-            // Make a POST request to create chatroom
             $.post('/create_chatroom', { item_id: itemId, uploaded_by_id: uploadedById })
                 .done(function (data) {
-                    // Redirect to the chats page after creating the chatroom
                     window.location.href = '/chats';
                 })
                 .fail(function (xhr, status, error) {
-                    // Handle failure
                     console.error('Failed to create chatroom:', error);
                 });
         });
     });
 </script>
+
 {% endblock %}

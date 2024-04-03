@@ -55,29 +55,6 @@ def about():
 def chatrooms():
     return render_template('chatrooms.html')
 
-@app.route('/chats')
-def chats():
-    return render_template('chats.html')
-
-@app.route('/send_message', methods=['POST'])
-@login_required
-def send_message():
-    message_content = request.form.get('message')
-    current_user_id = session.get('user_id')
-    if current_user_id:
-        try:
-            # Create a subcollection called "messages" and add a document with the specified structure
-            db.collection('private_chats').document(current_user_id).collection('messages').document().set({
-                'message': message_content,
-                'timestamp': datetime.now(),
-                'uploadedBy': current_user_id
-            })
-            return jsonify({'success': True}), 200
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    else:
-        return jsonify({'error': 'User not logged in'}), 401
-
 @app.route('/myListing', methods=['GET', 'POST'])
 def myListing():
     if 'user_id' not in session:
@@ -410,6 +387,7 @@ def load_user():
         g.user = None
 
 @app.route('/items.html')
+@login_required
 def items():
     # Get the item ID (document ID) from the request parameters
     item_id = request.args.get('id')
@@ -456,30 +434,92 @@ def items():
     
     return apology("Item not found", 404)
 
-@app.route('/create_chatroom', methods=['POST'])
+@app.route('/chats/<chatroom_id>')
+def chats(chatroom_id):
+    return render_template('chats.html', chatroom_id=chatroom_id)
+
 def create_chatroom():
     # Ensure the user is logged in
     if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
+        return None, False
 
     current_user_id = session['user_id']
     item_id = request.form.get('item_id')
     uploaded_by_id = request.form.get('uploaded_by_id')
 
+    # Initialize logger
+    logger = logging.getLogger(__name__)
+
     # Validate input
     if not item_id or not uploaded_by_id:
-        return jsonify({'error': 'Missing item ID or uploaded by ID'}), 400
+        error_message = 'Missing item ID or uploaded by ID'
+        logger.error(error_message)
+        return None, False
 
     # Generate chatroom ID by concatenating user IDs
     chatroom_id = f"{current_user_id}_{uploaded_by_id}"
 
     # Create chatroom document in Firestore
-    db.collection('private_chats').document(chatroom_id).set({
-        # Add any additional fields you want to store in the chatroom document
-    })
+    try:
+        db.collection('private_chats').document(chatroom_id).set({
+            # Add any additional fields you want to store in the chatroom document
+        })
+        logger.info(f"Chatroom created: {chatroom_id}")
+        return chatroom_id, True
+    except Exception as e:
+        logger.error(f"Error creating chatroom: {e}")
+        return None, False
+    
+# Flask route for creating chatroom
+@app.route('/create_chatroom', methods=['POST'])
+def create_chatroom_route():
+    chatroom_id, success = create_chatroom() # Call create_chatroom function
+    if success: # Check if the operation was successful
+        if chatroom_id:
+            # Return success response with chatroom ID
+            return jsonify({'success': True, 'chatroom_id': chatroom_id}), 200
+        else:
+            # Return error response if chatroom creation failed
+            return jsonify({'error': 'Failed to create chatroom'}), 500
+    else:
+        # Return error response if chatroom creation failed
+        return jsonify({'error': 'Failed to create chatroom'}), 500
 
-    # Return chatroom ID in the response
-    return jsonify({'chatroom_id': chatroom_id}), 200
+@app.route('/send_message', methods=['POST'])
+@login_required
+def send_message():
+    # Log the chatroom ID being passed
+    chatroom_id = request.form.get('chatroom_id')
+    app.logger.info(f"Received chatroom ID: {chatroom_id}")
+
+    message_content = request.form.get('message')
+    current_user_id = session.get('user_id')
+
+    # Initialize logger
+    logger = logging.getLogger(__name__)
+
+    if current_user_id and chatroom_id:
+        try:
+            # Create a new document with a random ID in the specified chatroom
+            message_doc_ref = db.collection('private_chats').document(chatroom_id).collection('messages').document()
+            message_doc_ref.set({
+                'message': message_content,
+                'timestamp': datetime.now(),
+                'uploadedBy': current_user_id
+            })
+
+            # Log chatroom ID being saved
+            logger.info(f"Message saved in chatroom {chatroom_id}")
+
+            return jsonify({'success': True}), 200
+        except Exception as e:
+            # Log error if an exception occurs
+            logger.error(f"Error saving message: {e}")
+            return jsonify({'error': str(e)}), 500
+    else:
+        # Log error if chatroom_id is missing or user is not logged in
+        logger.error("Invalid request: Missing chatroom_id or user not logged in")
+        return jsonify({'error': 'Invalid request: Missing chatroom_id or user not logged in'}), 400
 
 @app.route('/api/getItems', methods=['GET'])
 def get_items():

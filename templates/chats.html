@@ -42,6 +42,13 @@
                 id="message-input" 
               />
 
+              <!-- Hidden input for chatroom_id -->
+              <input
+                type="hidden"
+                id="chatroom-id"
+                value="{{ chatroom_id }}"
+              />
+
               <span class="input-group-text send-icon" id="send-button">
                 <i class="bi bi-send"></i> Send <!-- Added id attribute -->
               </span>
@@ -56,14 +63,15 @@
         $(document).ready(function() {
             // When the send button is clicked
             $("#send-button").click(function() {
-                // Get the message content from the input field
+                // Get the message content and chatroom ID from the input fields
                 var messageContent = $("#message-input").val();
+                var chatroomId = $("#chatroom-id").val();
 
                 // Send an AJAX request to the Flask route to send the message
                 $.ajax({
                     type: "POST",
                     url: "/send_message",
-                    data: { message: messageContent },
+                    data: { message: messageContent, chatroom_id: chatroomId }, // Include chatroom_id
                     success: function(response) {
                         // Handle success response if needed
                         console.log(response);

@@ -32,7 +32,12 @@ Item Details
 
             $.post('/create_chatroom', { item_id: itemId, uploaded_by_id: uploadedById })
                 .done(function (data) {
-                    window.location.href = '/chats';
+                    // Redirect to the newly created chatroom
+                    if (data.success) {
+                        window.location.href = '/chats/' + data.chatroom_id;
+                    } else {
+                        console.error('Failed to create chatroom:', data.error);
+                    }
                 })
                 .fail(function (xhr, status, error) {
                     console.error('Failed to create chatroom:', error);

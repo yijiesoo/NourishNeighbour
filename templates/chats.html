@@ -59,29 +59,50 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // When the send button is clicked
-            $("#send-button").click(function() {
-                // Get the message content and chatroom ID from the input fields
-                var messageContent = $("#message-input").val();
-                var chatroomId = $("#chatroom-id").val();
+<script>
+    $(document).ready(function() {
+        // Function to fetch messages
+        function fetchMessages() {
+            var chatroomId = $("#chatroom-id").val();
+            $.ajax({
+                type: "GET",
+                url: "/fetch_message",
+                data: { chatroom_id: chatroomId },
+                success: function(response) {
+                    response.forEach(function(message) {
+                        $(".msg-page").append('<p>' + message.message + '</p>');
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        }
 
-                // Send an AJAX request to the Flask route to send the message
-                $.ajax({
-                    type: "POST",
-                    url: "/send_message",
-                    data: { message: messageContent, chatroom_id: chatroomId }, // Include chatroom_id
-                    success: function(response) {
-                        // Handle success response if needed
-                        console.log(response);
-                    },
-                    error: function(xhr, status, error) {
-                        // Handle error response if needed
-                        console.error(xhr.responseText);
-                    }
-                });
+        // Fetch messages when the page loads
+        fetchMessages();
+
+        // When the send button is clicked
+        $("#send-button").click(function() {
+            var messageContent = $("#message-input").val();
+            var chatroomId = $("#chatroom-id").val();
+
+            // Send an AJAX request to the Flask route to send the message
+            $.ajax({
+                type: "POST",
+                url: "/send_message",
+                data: { message: messageContent, chatroom_id: chatroomId },
+                success: function(response) {
+                    // Clear input field and blur it after sending message
+                    $("#message-input").val("").blur();
+                    // Optionally, fetch messages again to update the chat interface
+                    fetchMessages();
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
             });
         });
-    </script>
+    });
+</script>
 {% endblock %}

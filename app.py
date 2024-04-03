@@ -520,6 +520,37 @@ def send_message():
         # Log error if chatroom_id is missing or user is not logged in
         logger.error("Invalid request: Missing chatroom_id or user not logged in")
         return jsonify({'error': 'Invalid request: Missing chatroom_id or user not logged in'}), 400
+    
+@app.route('/fetch_message', methods=['GET'])
+def fetch_message():
+    # Assuming you want to fetch messages for a specific chatroom
+    chatroom_id = request.args.get('chatroom_id')
+    app.logger.info(f"Received chatroom ID: {chatroom_id}")
+
+    current_user_id = session.get('user_id')
+
+    # Initialize logger
+    logger = logging.getLogger(__name__)
+
+    if current_user_id and chatroom_id:
+        try:
+            # Fetch messages from the specified chatroom
+            messages = db.collection('private_chats').document(chatroom_id).collection('messages').get()
+            # Assuming you want to return the messages as JSON
+            messages_data = [{'message': msg.to_dict()['message'], 'timestamp': msg.to_dict()['timestamp'], 'uploadedBy': msg.to_dict()['uploadedBy']} for msg in messages]
+
+            # Log chatroom ID being fetched
+            logger.info(f"Messages fetched from chatroom {chatroom_id}")
+
+            return jsonify(messages_data), 200
+        except Exception as e:
+            # Log error if an exception occurs
+            logger.error(f"Error fetching messages: {e}")
+            return jsonify({'error': str(e)}), 500
+    else:
+        # Log error if chatroom_id is missing or user is not logged in
+        logger.error("Invalid request: Missing chatroom_id or user not logged in")
+        return jsonify({'error': 'Invalid request: Missing chatroom_id or user not logged in'}), 400
 
 @app.route('/api/getItems', methods=['GET'])
 def get_items():

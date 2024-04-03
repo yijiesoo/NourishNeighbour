@@ -12,7 +12,7 @@
         <div class="container1">
           <img2 src="static\default-profile-picture-male-icon.png" class="msgimg" />
           <div class="active">
-            <p>NourishNeighbour</p>
+            <p> Persons name here </p>
           </div>
         </div>
       </div>
@@ -23,12 +23,8 @@
         <div class="msg-inbox">
           <div class="chats">
             <!-- Message container -->
-            <div class="msg-page">
-              <!-- Incoming messages -->
-              <!-- Your incoming message code goes here -->
-
-              <!-- Outgoing messages -->
-              <!-- Your outgoing message code goes here -->
+            <div class="msg-page" id="message-container">
+              <!-- Messages will be appended here dynamically -->
             </div>
           </div>
 
@@ -59,50 +55,93 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        // Function to fetch messages
-        function fetchMessages() {
-            var chatroomId = $("#chatroom-id").val();
-            $.ajax({
-                type: "GET",
-                url: "/fetch_message",
-                data: { chatroom_id: chatroomId },
-                success: function(response) {
-                    response.forEach(function(message) {
-                        $(".msg-page").append('<p>' + message.message + '</p>');
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                }
-            });
-        }
+    <script>
+      $(document).ready(function() {
+          // Function to fetch messages
+          function fetchMessages() {
+              var chatroomId = $("#chatroom-id").val();
+              $.ajax({
+                  type: "GET",
+                  url: "/fetch_message",
+                  data: { chatroom_id: chatroomId },
+                  success: function(response) {
+                      // Clear previous messages before appending new ones
+                      $("#message-container").empty();
+    
+                      response.forEach(function(message) {
+                          var messageDiv = $('<div class="message"></div>');
+                          var messageContent = $('<p class="message-content"></p>').text(message.message);
+                          var timestamp = $('<span class="message-timestamp"></span>').text(formatTimestamp(message.timestamp)); 
+                          messageDiv.append(messageContent).append(timestamp);
+                          
+                          if (message.uploadedBy === "{{ current_user_id }}") {
+                              // If message uploaded by current user, align right
+                              messageDiv.addClass("message-right");
+                          } else {
+                              // If message uploaded by other user, align left
+                              messageDiv.addClass("message-left");
+                          }
+                          $("#message-container").append(messageDiv);
+                      });
+                  },
+                  error: function(xhr, status, error) {
+                      console.error(xhr.responseText);
+                  }
+              });
+          }
 
-        // Fetch messages when the page loads
-        fetchMessages();
-
-        // When the send button is clicked
-        $("#send-button").click(function() {
-            var messageContent = $("#message-input").val();
-            var chatroomId = $("#chatroom-id").val();
-
-            // Send an AJAX request to the Flask route to send the message
-            $.ajax({
-                type: "POST",
-                url: "/send_message",
-                data: { message: messageContent, chatroom_id: chatroomId },
-                success: function(response) {
-                    // Clear input field and blur it after sending message
-                    $("#message-input").val("").blur();
-                    // Optionally, fetch messages again to update the chat interface
-                    fetchMessages();
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                }
-            });
-        });
-    });
-</script>
+          // Format timestamp function
+          function formatTimestamp(timestampString) {
+              var date = new Date(timestampString); // Convert timestamp string to Date object
+              var options = { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric', 
+                  hour: 'numeric', 
+                  minute: 'numeric', 
+                  second: 'numeric',
+                  timeZoneName: 'short'
+              };
+              return date.toLocaleDateString(undefined, options); // Format the date
+          }
+    
+          // Fetch messages when the page loads
+          fetchMessages();
+    
+          // When the send button is clicked
+          $("#send-button").click(function() {
+              sendMessage();
+          });
+    
+          // When Enter key is pressed in the input field
+          $("#message-input").keydown(function(event) {
+              if (event.keyCode === 13) {
+                  sendMessage();
+              }
+          });
+    
+          // Function to send message
+          function sendMessage() {
+              var messageContent = $("#message-input").val();
+              var chatroomId = $("#chatroom-id").val();
+    
+              // Send an AJAX request to the Flask route to send the message
+              $.ajax({
+                  type: "POST",
+                  url: "/send_message",
+                  data: { message: messageContent, chatroom_id: chatroomId },
+                  success: function(response) {
+                      // Clear input field and blur it after sending message
+                      $("#message-input").val("").blur();
+                      // Optionally, fetch messages again to update the chat interface
+                      fetchMessages();
+                  },
+                  error: function(xhr, status, error) {
+                      console.error(xhr.responseText);
+                  }
+              });
+          }
+      });
+    </script>      
+  
 {% endblock %}

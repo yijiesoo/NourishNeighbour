@@ -294,9 +294,11 @@ def fetch_chatrooms(user_id):
         chatroom_id = chatroom.id
         parts = chatroom_id.split('_')
         if user_id in parts:
-            # You may fetch additional information about the chatroom here
-            matched_chatrooms.append(chatroom_id)
-    return matched_chatrooms 
+            other_user_id = [part for part in parts if part != user_id][0]
+            other_user_name = db.collection('names').document(other_user_id).get().to_dict().get('name', 'Unknown')
+            logging.info(f"Displaying chatroom for user: {other_user_name}")
+            matched_chatrooms.append({'chatroom_id': chatroom_id, 'other_user_name': other_user_name})
+    return matched_chatrooms
 
 @app.route('/chatrooms')
 @login_required

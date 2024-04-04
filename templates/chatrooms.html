@@ -7,8 +7,8 @@
 {% block body %}
     <h1>Chatrooms Page</h1>
     <ul>
-        {% for chatroom_id in chatrooms %}
-            <li><a href="{{ url_for('chats', chatroom_id=chatroom_id) }}">{{ chatroom_id }}</a></li>
+        {% for chatroom in chatrooms %}
+            <li><a href="{{ url_for('chats', chatroom_id=chatroom['chatroom_id']) }}">{{ chatroom['other_user_name'] }}</a></li>
         {% endfor %}
     </ul>
 {% endblock %}

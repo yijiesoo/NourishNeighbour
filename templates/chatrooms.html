@@ -1,9 +1,14 @@
 {% extends "homepage.html" %}
 
 {% block title %}
-Chatrooms
+    Chatrooms
 {% endblock %}
-<h1>Chatrooms page goes here</h1>
-{% block body %}
 
+{% block body %}
+    <h1>Chatrooms Page</h1>
+    <ul>
+        {% for chatroom in chatrooms %}
+            <li>{{ chatroom }}</li>
+        {% endfor %}
+    </ul>
 {% endblock %}

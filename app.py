@@ -51,10 +51,6 @@ def homepage():
 def about():
     return render_template('about.html')
 
-@app.route('/chatrooms')
-def chatrooms():
-    return render_template('chatrooms.html')
-
 @app.route('/myListing', methods=['GET', 'POST'])
 def myListing():
     if 'user_id' not in session:
@@ -289,6 +285,30 @@ def nourished():
 @app.route('/contact')
 def contact():
     return render_template("contact.html")
+
+@app.route('/fetch_chatrooms/<user_id>', methods=['GET'])
+def fetch_chatrooms(user_id):
+    chatrooms = db.collection('private_chats').stream()
+    matched_chatrooms = []
+    for chatroom in chatrooms:
+        chatroom_id = chatroom.id
+        parts = chatroom_id.split('_')
+        if user_id in parts:
+            # You may fetch additional information about the chatroom here
+            matched_chatrooms.append(chatroom_id)
+    return matched_chatrooms 
+
+@app.route('/chatrooms')
+@login_required
+def chatrooms():
+    user_id = session['user_id']
+    if not user_id:
+        # Handle missing user_id parameter gracefully
+        flash('User ID is missing', 'error')
+        return redirect(url_for('homepage'))
+
+    matched_chatrooms = fetch_chatrooms(user_id)
+    return render_template("chatrooms.html", chatrooms=matched_chatrooms)
 
 # Ensure responses aren't cached
 @app.after_request

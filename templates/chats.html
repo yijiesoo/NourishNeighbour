@@ -12,7 +12,8 @@
         <div class="container1">
           <img2 src="static\default-profile-picture-male-icon.png" class="msgimg" />
           <div class="active">
-            <p> Persons name here </p>
+            <!-- Display other user's name here -->
+            <p>{{ request.args.get('other_user_name', 'Other User') }}</p>
           </div>
         </div>
       </div>

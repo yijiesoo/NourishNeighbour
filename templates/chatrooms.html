@@ -5,10 +5,14 @@
 {% endblock %}
 
 {% block body %}
-    <h1>Chatrooms Page</h1>
-    <ul>
-        {% for chatroom in chatrooms %}
-            <li><a href="{{ url_for('chats', chatroom_id=chatroom['chatroom_id'], other_user_name=chatroom['other_user_name']) }}">{{ chatroom['other_user_name'] }}</a></li>
-        {% endfor %}
-    </ul>
+    <div class="chatroom-container">
+        <h1>Chatrooms Page</h1>
+        <ul class="chatroom-list">
+            {% for chatroom in chatrooms %}
+                <li class="chatroom-item">
+                    <a href="{{ url_for('chats', chatroom_id=chatroom['chatroom_id'], other_user_name=chatroom['other_user_name']) }}" class="chatroom-link"><strong>{{ chatroom['other_user_name'] }}</strong></a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

@@ -328,6 +328,35 @@ button[type="submit"] {
     padding: 0 0 50px 0;
 }
 
+.chatroom-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+}
+
+.chatroom-list {
+    list-style: none;
+    padding: 0;
+}
+
+.chatroom-item {
+    margin-bottom: 10px;
+}
+
+.chatroom-link {
+    display: block;
+    padding: 10px;
+    background-color: #f0f0f0;
+    text-decoration: none;
+    color: #333;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.chatroom-link:hover {
+    background-color: #e0e0e0;
+}
+
 .msg-inbox {
     border: 1px solid #ccc;
     overflow: hidden;

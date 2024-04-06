@@ -1,148 +1,133 @@
 {% extends "homepage.html" %}
 
 {% block title %}
-    Chat to collect your food items here! : 
+    Chat Room
 {% endblock %}
 
 {% block body %}
     <!-- Main container -->
     <div class="container">
-      <!-- msg-header section starts -->
-      <div class="msg-header">
-        <div class="container1">
-          <img2 src="static\default-profile-picture-male-icon.png" class="msgimg" />
-          <div class="active">
-            <!-- Display other user's name here -->
-            <p>{{ request.args.get('other_user_name', 'Other User') }}</p>
-          </div>
-        </div>
-      </div>
-      <!-- msg-header section ends -->
-
-      <!-- Chat inbox  -->
-      <div class="chat-page">
-        <div class="msg-inbox">
-          <div class="chats">
-            <!-- Message container -->
-            <div class="msg-page" id="message-container">
-              <!-- Messages will be appended here dynamically -->
+        <!-- Chat header -->
+        <div class="msg-header">
+            <div class="container1">
+                <!-- Profile picture -->
+                <img src="{% if profile_picture_url %}{{ profile_picture_url }}{% else %}/static/default-profile-picture-male-icon.png{% endif %}" class="msgimg" alt="Profile photo" />
+                <div class="active">
+                    <!-- Display other user's name here -->
+                    <p>{{ request.args.get('other_user_name', 'Other User') }}</p>
+                </div>
             </div>
-          </div>
-
-          <!-- msg-bottom section -->
-          <div class="msg-bottom">
-            <div class="input-group">
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Write message..."
-                id="message-input" 
-              />
-
-              <!-- Hidden input for chatroom_id -->
-              <input
-                type="hidden"
-                id="chatroom-id"
-                value="{{ chatroom_id }}"
-              />
-
-              <span class="input-group-text send-icon" id="send-button">
-                <i class="bi bi-send"></i> Send <!-- Added id attribute -->
-              </span>
-            </div>
-          </div>
         </div>
-      </div>
+        
+        <!-- Chat messages -->
+        <div class="chat-page">
+            <div class="msg-inbox">
+                <div class="chats">
+                    <!-- Message container -->
+                    <div class="msg-page" id="message-container">
+                        <!-- Messages will be appended here dynamically -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat input area -->
+            <div class="msg-bottom">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Write message..." id="message-input" />
+                    <input type="hidden" id="chatroom-id" value="{{ chatroom_id }}" />
+                    <span class="input-group-text send-icon" id="send-button"><i class="bi bi-send"></i> Send</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      $(document).ready(function() {
-          // Function to fetch messages
-          function fetchMessages() {
-              var chatroomId = $("#chatroom-id").val();
-              $.ajax({
-                  type: "GET",
-                  url: "/fetch_message",
-                  data: { chatroom_id: chatroomId },
-                  success: function(response) {
-                      // Clear previous messages before appending new ones
-                      $("#message-container").empty();
-    
-                      response.forEach(function(message) {
-                          var messageDiv = $('<div class="message"></div>');
-                          var messageContent = $('<p class="message-content"></p>').text(message.message);
-                          var timestamp = $('<span class="message-timestamp"></span>').text(formatTimestamp(message.timestamp)); 
-                          messageDiv.append(messageContent).append(timestamp);
-                          
-                          if (message.uploadedBy === "{{ current_user_id }}") {
-                              // If message uploaded by current user, align right
-                              messageDiv.addClass("message-right");
-                          } else {
-                              // If message uploaded by other user, align left
-                              messageDiv.addClass("message-left");
-                          }
-                          $("#message-container").append(messageDiv);
-                      });
-                  },
-                  error: function(xhr, status, error) {
-                      console.error(xhr.responseText);
-                  }
-              });
-          }
+        $(document).ready(function() {
+            // Function to fetch messages
+            function fetchMessages() {
+                var chatroomId = $("#chatroom-id").val();
+                $.ajax({
+                    type: "GET",
+                    url: "/fetch_message",
+                    data: { chatroom_id: chatroomId },
+                    success: function(response) {
+                        // Clear previous messages before appending new ones
+                        $("#message-container").empty();
 
-          // Format timestamp function
-          function formatTimestamp(timestampString) {
-              var date = new Date(timestampString); // Convert timestamp string to Date object
-              var options = { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric', 
-                  hour: 'numeric', 
-                  minute: 'numeric', 
-                  second: 'numeric',
-                  timeZoneName: 'short'
-              };
-              return date.toLocaleDateString(undefined, options); // Format the date
-          }
-    
-          // Fetch messages when the page loads
-          fetchMessages();
-    
-          // When the send button is clicked
-          $("#send-button").click(function() {
-              sendMessage();
-          });
-    
-          // When Enter key is pressed in the input field
-          $("#message-input").keydown(function(event) {
-              if (event.keyCode === 13) {
-                  sendMessage();
-              }
-          });
-    
-          // Function to send message
-          function sendMessage() {
-              var messageContent = $("#message-input").val();
-              var chatroomId = $("#chatroom-id").val();
-    
-              // Send an AJAX request to the Flask route to send the message
-              $.ajax({
-                  type: "POST",
-                  url: "/send_message",
-                  data: { message: messageContent, chatroom_id: chatroomId },
-                  success: function(response) {
-                      // Clear input field and blur it after sending message
-                      $("#message-input").val("").blur();
-                      // Optionally, fetch messages again to update the chat interface
-                      fetchMessages();
-                  },
-                  error: function(xhr, status, error) {
-                      console.error(xhr.responseText);
-                  }
-              });
-          }
-      });
-    </script>      
-  
+                        response.forEach(function(message) {
+                            var messageDiv = $('<div class="message"></div>');
+                            var messageContent = $('<p class="message-content"></p>').text(message.message);
+                            var timestamp = $('<span class="message-timestamp"></span>').text(formatTimestamp(message.timestamp));
+                            var profileIcon = $('<img class="profile-icon" src="{{ profile_picture_url }}" alt="Profile icon">');
+
+                            // Append profile icon and message content to message div
+                            messageDiv.append(profileIcon).append(messageContent).append(timestamp);
+
+                            // Align messages based on sender
+                            if (message.uploadedBy === "{{ current_user_id }}") {
+                                messageDiv.addClass("message-right");
+                            } else {
+                                messageDiv.addClass("message-left");
+                            }
+                            $("#message-container").append(messageDiv);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+
+            // Format timestamp function
+            function formatTimestamp(timestampString) {
+                var date = new Date(timestampString);
+                var options = {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                return date.toLocaleDateString(undefined, options);
+            }
+
+            // Fetch messages when the page loads
+            fetchMessages();
+
+            // When the send button is clicked
+            $("#send-button").click(function() {
+                sendMessage();
+            });
+
+            // When Enter key is pressed in the input field
+            $("#message-input").keydown(function(event) {
+                if (event.keyCode === 13) {
+                    sendMessage();
+                }
+            });
+
+            // Function to send message
+            function sendMessage() {
+                var messageContent = $("#message-input").val();
+                var chatroomId = $("#chatroom-id").val();
+
+                // Send an AJAX request to the Flask route to send the message
+                $.ajax({
+                    type: "POST",
+                    url: "/send_message",
+                    data: { message: messageContent, chatroom_id: chatroomId },
+                    success: function(response) {
+                        // Clear input field and blur it after sending message
+                        $("#message-input").val("").blur();
+                        // Optionally, fetch messages again to update the chat interface
+                        fetchMessages();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}

@@ -471,7 +471,14 @@ def items():
 
 @app.route('/chats/<chatroom_id>')
 def chats(chatroom_id):
-    return render_template('chats.html', chatroom_id=chatroom_id)
+    # Retrieve the profile_picture_url from the session
+    profile_picture_url = session.get('profile_picture_url', None)
+
+    # If profile_picture_url is not in the session, you might want to set a default value
+    if profile_picture_url is None:
+        profile_picture_url = url_for('static', filename='default-profile-image.png')
+
+    return render_template('chats.html', chatroom_id=chatroom_id, profile_picture_url=profile_picture_url)
 
 def create_chatroom():
     # Ensure the user is logged in

@@ -42,11 +42,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@app.route('/')
-def homepage():
-    profile_picture_url = request.args.get('profile_picture_url')
-    return render_template('homepage.html', profile_picture_url=profile_picture_url)
-
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -119,6 +114,24 @@ def profile():
         return redirect(url_for('login'))
     else:
         return render_template('profile.html')
+    
+@app.context_processor
+def inject_profile_picture_url():
+    profile_picture_url = session.get('profile_picture_url', url_for('static', filename='default-profile-image.png'))
+    return dict(profile_picture_url=profile_picture_url)
+    
+@app.route('/')
+def homepage():
+    # Retrieve the profile_picture_url from the session
+    profile_picture_url = session.get('profile_picture_url', None)
+
+    # If profile_picture_url is not in the session, you might want to set a default value
+    if profile_picture_url is None:
+        profile_picture_url = url_for('static', filename='default-profile-image.png')
+
+    # Pass the profile_picture_url to the template
+    return render_template('homepage.html', profile_picture_url=profile_picture_url)
+
 
 ALLOWED_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
@@ -169,8 +182,10 @@ def profilepicture():
                         'imageURL': image_url
                     })
 
+                    session['profile_picture_url'] = image_url
+
                     flash('Successfully uploaded picture.', 'success')
-                    return redirect(url_for('uploaded_file', filename=filename))
+                    return redirect(url_for('profile'))
                 except Exception as e:
                     flash('Error uploading picture. Please try again.', 'error')
                     return redirect(request.url)
@@ -351,13 +366,11 @@ def login():
                 # You would typically handle password verification on the client side or use a different method for server-side password verification
                 # For demonstration purposes, we'll assume the password is correct
                 flash("Login successful!", "success")
-                # Store user ID in session
+                # Store user ID and profile picture URL in session
                 session['user_id'] = user.uid
+                session['profile_picture_url'] = get_profile_picture_url(user.uid)
 
-                # Get the profile picture URL for the logged-in user
-                profile_picture_url = get_profile_picture_url(user.uid)
-                # Pass the profile picture URL to the homepage template
-                return redirect(url_for('homepage', profile_picture_url=profile_picture_url))
+                return redirect(url_for('homepage'))
             except auth.UserNotFoundError:
                 flash("Email not found. Please register first.", "danger")
             except Exception as e:
@@ -582,6 +595,9 @@ def get_items():
     # Reference to the Firestore collection
     listings_ref = db.collection('listings')
 
+    # Get the current user's ID
+    current_user_id = session.get('user_id')
+
     # Query construction based on selected category and user's allergy
     if selected_category == 'all':
         if user_allergy:
@@ -597,6 +613,10 @@ def get_items():
         else:
             # Filter by category only
             query = listings_ref.where('category', '==', selected_category)
+
+    # Exclude items uploaded by the current user
+    if current_user_id:
+        query = query.where('uploadedBy', '!=', current_user_id)
 
     # Execute the query and get the results
     items = query.get()

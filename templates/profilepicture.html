@@ -1,7 +1,7 @@
 {% extends "profile.html" %}
 
 {% block title %}
-        Set Up Profile Picture
+    Set Up Profile Picture
 {% endblock %}
 
 {% block body %}
@@ -11,5 +11,9 @@
     <input type="file" name="file">
     <input type="submit" value="Upload">
 </form>
+
+{% if user_profile_picture %}
+    <img src="{{ user_profile_picture }}" alt="Profile Picture">
+{% endif %}
 
 {% endblock %}

@@ -11,6 +11,7 @@ Nourished
     <label for="allergies">Allergies/ Dietary Restrictions (if any):</label>
     <input type="text" name="allergy" id="allergy">
     <input type="submit" value="Submit">
+    <button id="reset-filter">Reset Filter</button>
 </form>
 
 <label for="category-filter">Select a category:</label>
@@ -57,6 +58,14 @@ Nourished
             filterItems();
         });
 
+        // Attach a click event listener to the reset filter button
+        $('#reset-filter').on('click', function () {
+            // Clear the allergy input field
+            $('#allergy').val('');
+            // Trigger the filterItems function again without any allergy filter
+            filterItems();
+        });
+
         // Attach a click event listener to the item titles
         $(document).on('click', '.item-title', function () {
             // Get the item ID (document ID) from the parent element's data-id attribute
@@ -67,6 +76,7 @@ Nourished
 
         function filterItems() {
             var selectedCategory = $('#category-filter').val(); // Get the selected category
+            var allergies = $('#allergy').val(); // Get the allergies input value
 
             // Make an AJAX request to your Flask endpoint to fetch filtered data
             $.ajax({
@@ -78,21 +88,26 @@ Nourished
                     $('#filtered-content').empty();
 
                     // Append the filtered data to the content container
-                    // Append the filtered data to the content container
                     $.each(data, function (index, item) {
-                        // Customize this part to display your item data as you like
-                        var itemHtml = '<div class="item" data-id="' + item.id + '">' + // Use document ID as data-id
-                            '<a href="' + itemsUrl + '?id=' + item.id + '">' + '<h2 class="item-title">' + item.title + '</h2>' + '</a>' +
-                            '<p>Category: ' + item.category + '</p>' +
-                            '<p>Other categories (if specified): ' + item.other + '</p>' +
-                            '<p>Ingredients: ' + item.ingredients + '</p>' +
-                            '<p>Quantity: ' + item.quantity + '</p>' +
-                            '<p>Expiry date: ' + item.expiry_date + '</p>' +
-                            '<p>Location of nourisher: ' + item.location + '</p>' +
-                            '<img src="' + item.image_url + '" alt="' + item.title + '">' +
-                            // Add more item details as needed
-                            '</div>';
-                        $('#filtered-content').append(itemHtml);
+                        // Check if the item contains any ingredient that matches the allergies
+                        var ingredients = item.ingredients.toLowerCase();
+                        var hasAllergy = allergies !== '' && ingredients.includes(allergies.toLowerCase());
+
+                        if (!hasAllergy) {
+                            // Customize this part to display your item data as you like
+                            var itemHtml = '<div class="item" data-id="' + item.id + '">' + // Use document ID as data-id
+                                '<a href="' + itemsUrl + '?id=' + item.id + '">' + '<h2 class="item-title">' + item.title + '</h2>' + '</a>' +
+                                '<p>Category: ' + item.category + '</p>' +
+                                '<p>Other categories (if specified): ' + item.other + '</p>' +
+                                '<p>Ingredients: ' + item.ingredients + '</p>' +
+                                '<p>Quantity: ' + item.quantity + '</p>' +
+                                '<p>Expiry date: ' + item.expiry_date + '</p>' +
+                                '<p>Location of nourisher: ' + item.location + '</p>' +
+                                '<img src="' + item.image_url + '" alt="' + item.title + '">' +
+                                // Add more item details as needed
+                                '</div>';
+                            $('#filtered-content').append(itemHtml);
+                        }
                     });
 
                 },
@@ -101,6 +116,7 @@ Nourished
                 }
             });
         }
+
     });
 </script>
 

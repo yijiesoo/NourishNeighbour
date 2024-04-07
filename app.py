@@ -413,6 +413,51 @@ def register():
 
     return render_template("register.html")
 
+@app.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query')
+    if not query:
+        return jsonify({'error': 'No query provided'}), 400
+
+    # Initialize an empty list to store search results
+    search_results = []
+
+    try:
+        # Query Firestore for listings collection
+        listings_ref = db.collection('listings')
+        # Query for documents where the title contains the search query
+        query_results = listings_ref.where('title', '>=', query).where('title', '<=', query + '\uf8ff').stream()
+
+        # Iterate through the query results
+        for doc in query_results:
+            listing_data = doc.to_dict()
+            # Use doc.id directly as item_id
+            item_id = doc.id
+            search_results.append({
+                'id': item_id, # Use item_id here
+                'title': listing_data.get('title'),
+                'description': listing_data.get('description'),
+                'category': listing_data.get('category'),
+                'other': listing_data.get('other'),
+                'ingredients': listing_data.get('ingredients'),
+                'quantity': listing_data.get('quantity'),
+                'expiry_date': listing_data.get('expiry_date'),
+                'location': listing_data.get('location'),
+                'image_url': listing_data.get('image_url'),
+            })
+
+            # Log the title of the item and its document ID
+            logging.info(f"Found item: Title - {listing_data.get('title')}, Document ID - {item_id}")
+
+        # If no items found, log the message
+        if not search_results:
+            logging.info("No items found for the query.")
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    return render_template('items.html', search_results=search_results)
+
 @app.before_request
 def load_user():
     user_id = session.get('user_id')

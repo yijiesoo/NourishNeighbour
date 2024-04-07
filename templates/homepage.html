@@ -38,14 +38,16 @@
                         <li class="nav-item"><a class="nav-link" href="{{url_for('myListing')}}">My Listings</a></li>
                         <li class="nav-item">
                             <a id="profile-image-link" href="{{ url_for('profile') }}">
-                                <img class="profile-image" src="{% if profile_picture_url %}{{ profile_picture_url }}{% else %}/static/default-profile-image.png{% endif %}" alt="Profile photo">
-                            </a>                            
+                                <img class="profile-image"
+                                    src="{% if profile_picture_url %}{{ profile_picture_url }}{% else %}/static/default-profile-image.png{% endif %}"
+                                    alt="Profile photo">
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a id="chatrooms-icon-link" href="{{ url_for('chatrooms') }}">
                                 <i class="fas fa-comment-alt"></i>
                             </a>
-                        </li>                        
+                        </li>
                     </ul>
                     <ul class="navbar-nav ms-auto mt-2">
                         {% if session["user_id"] %}
@@ -60,9 +62,9 @@
                 </nav>
             </div>
             <form action="/search" method="GET">
-                <input type="text" name="query" placeholder="Search for anything and everything...">
+                <input type="text" name="query" placeholder="Search for a specific item here...">
                 <button type="submit">Search</button>
-            </form>
+            </form>            
         </div>
     </header>
     <main>
@@ -89,6 +91,41 @@
             </div>
         </div>
     </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var createChatroomUrl = "/create_chatroom";
+
+            function searchItem() {
+                var itemId = $(this).data('item-id');
+                var uploadedById = $(this).data('uploaded-by-user-id');
+
+                $.post('/create_chatroom', { item_id: itemId, uploaded_by_id: uploadedById })
+                    .done(function (data) {
+                        // Redirect to the newly created chatroom
+                        if (data.success) {
+                            window.location.href = '/chats/' + data.chatroom_id;
+                        } else {
+                            console.error('Failed to create chatroom:', data.error);
+                        }
+                    })
+                    .fail(function (xhr, status, error) {
+                        console.error('Failed to create chatroom:', error);
+                    });
+            }
+
+            $(document).on('click', '.want-it-btn', searchItem);
+
+            // Bind the searchItem function to the Enter key press event
+            $(document).on('keypress', function (e) {
+                if (e.which === 13) { // Check if the pressed key is Enter
+                    // Trigger the searchItem function
+                    $('.want-it-btn').trigger('click');
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

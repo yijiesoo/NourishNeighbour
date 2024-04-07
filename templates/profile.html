@@ -1,17 +1,17 @@
 {% extends "homepage.html" %}
 
 {% block title %}
-Profile settings
+    Profile Settings
 {% endblock %}
 
 {% block body %}
-
-<h1> Profile Screen </h1>
-<div>
-<a id="profile-picture-link" href="{{ url_for('profilepicture') }}"> Change Profile Picture </a>
-</div>
-<div>
-    <a id="name-link" href="{{ url_for('name') }}"> Change Your Name </a>
-</div>
-
+    <h1>Profile Settings</h1>
+    <ul class="chatroom-list">
+        <li class="chatroom-item">
+            <a class="chatroom-link" href="{{ url_for('profilepicture') }}">Change Profile Picture</a>
+        </li>
+        <li class="chatroom-item">
+            <a class="chatroom-link" href="{{ url_for('name') }}">Change Your Name</a>
+        </li>
+    </ul>
 {% endblock %}

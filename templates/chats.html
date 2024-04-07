@@ -59,7 +59,7 @@
                             var messageDiv = $('<div class="message"></div>');
                             var messageContent = $('<p class="message-content"></p>').text(message.message);
                             var timestamp = $('<span class="message-timestamp"></span>').text(formatTimestamp(message.timestamp));
-                            var profileIcon = $('<img class="profile-icon" src="{{ profile_picture_url }}" alt="Profile icon">');
+                            var profileIcon = $('<img class="profile-icon" src="{% if profile_picture_url %}{{ profile_picture_url }}{% else %}/static/default-profile-picture-male-icon.png{% endif %}" alt="Profile icon">');
 
                             // Append profile icon and message content to message div
                             messageDiv.append(profileIcon).append(messageContent).append(timestamp);

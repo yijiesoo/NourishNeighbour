@@ -84,7 +84,7 @@ def myListing():
 @app.route('/theirListing', methods=['GET', 'POST'])
 def theirListing():
     user_id = request.args.get('user_id')
-    print("User ID:", user_id)  # Log the user ID being fetched
+    print("User ID:", user_id)
 
     their_listings = []
 
@@ -92,6 +92,16 @@ def theirListing():
     for doc in listings_ref:
         print("Retrieved document with ID:", doc.id)
         listing_data = doc.to_dict()
+        
+        user_doc_ref = db.collection('names').document(user_id).get()
+        user_data = user_doc_ref.to_dict()
+        user_name = user_data.get('name') if user_data else None
+
+        # Fetch the user's profile picture URL from the 'profile_pictures' collection based on user_id
+        profile_pic_doc_ref = db.collection('profile_pictures').document(user_id).get()
+        profile_pic_data = profile_pic_doc_ref.to_dict()
+        profile_pic_url = profile_pic_data.get('image_url') if profile_pic_data else None
+
         their_listings.append({
             'id': doc.id,  
             'title': listing_data.get('title'),
@@ -102,7 +112,9 @@ def theirListing():
             'quantity': listing_data.get('quantity'),
             'expiry_date': listing_data.get('expiry_date'),
             'location': listing_data.get('location'),
-            'image_url': listing_data.get('image_url')
+            'image_url': listing_data.get('image_url'),
+            'uploadedBy': user_name,
+            'profile_picture_url': profile_pic_url  
         })
 
     return render_template('theirListing.html', their_listings=their_listings)

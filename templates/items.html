@@ -20,8 +20,7 @@ Item Details
 
 {% if item %}
     <div>
-    <button class="want-it-btn" data-item-id="{{ item.id }}" data-uploaded-by-user-id="{{ item.uploadedByUserId }}">I Want
-        It</button>
+        <button class="want-it-btn" data-item-id="{{ item.id }}" data-uploaded-by-user-id="{{ item.uploadedByUserId }}">I Want It</button>
         <h2>{{ item.title }}</h2>
         <p>Description: {{ item.description }}</p>
         <p>Category: {{ item.category }}</p>
@@ -30,10 +29,9 @@ Item Details
         <p>Quantity: {{ item.quantity }}</p>
         <p>Expiry Date: {{ item.expiry_date }}</p>
         <p>Location: {{ item.location }}</p>
-        <p>Uploaded By: {{ item.uploadedBy }}</p>
+        <p>Uploaded By: <a href="/theirListing?user_id={{ item.uploadedByUserId }}">{{ item.uploadedBy }}</a></p>
         <img src="{{ item.image_url }}" alt="{{ item.title }}">
     </div>
-
 {% endif %}
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

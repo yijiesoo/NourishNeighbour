@@ -1,9 +1,28 @@
-{% extends "items.html" %}
+{% extends "homepage.html" %}
 
 {% block title %}
-{{ otherUsers }} listings
+Their Listings
 {% endblock %}
 
 {% block body %}
-
+<h1>Their Listings</h1>
+{% if their_listings %}
+<ul>
+    {% for listing in their_listings %}
+    <li>
+        <h2>{{ listing.title }}</h2>
+        <p>Description: {{ listing.description }}</p>
+        <p>Category: {{ listing.category }}</p>
+        <p>Other: {{ listing.other }}</p>
+        <p>Ingredients: {{ listing.ingredients }}</p>
+        <p>Quantity: {{ listing.quantity }}</p>
+        <p>Expiry Date: {{ listing.expiry_date }}</p>
+        <p>Location: {{ listing.location }}</p>
+        <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>This user has no listings.</p>
+{% endif %}
 {% endblock %}

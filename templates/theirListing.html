@@ -9,10 +9,6 @@
 {% if their_listings %}
     <h1>{{ their_listings[0].uploadedBy }}</h1> 
 
-    {% if profile_picture_url %}
-        <img src="{{ profile_picture_url }}" alt="Profile Picture">
-    {% endif %}
-
     <ul>
         {% for listing in their_listings %}
             <li>

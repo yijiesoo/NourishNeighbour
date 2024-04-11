@@ -11,10 +11,11 @@
         <div class="msg-header">
             <div class="container1">
                 <!-- Profile picture -->
-                <img src="{% if profile_picture_url %}{{ profile_picture_url }}{% else %}/static/default-profile-picture-male-icon.png{% endif %}" class="msgimg" alt="Profile photo" />
                 <div class="active">
                     <!-- Display other user's name here -->
                     <p>{{ request.args.get('other_user_name', 'Other User') }}</p>
+                    <p>Other User ID: {{other_user_id}}</p>
+                    <a href="{{ url_for('theirListing', user_id=other_user_id) }}">View Their Listing</a>
                 </div>
             </div>
         </div>

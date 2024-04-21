@@ -1,4 +1,4 @@
-# YOUR PROJECT TITLE: NourishNeighbour
+#NourishNeighbour
 #### Video Demo:  <https://youtu.be/DjLVjwCcRDE>
 #### Description:
 Hello everyone, welcome to NourishNeighbor, which is a simple and useful food sharing app. 
